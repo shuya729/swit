@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>259369139585-465gq5i390ndt8sedrckefo34l6sevmb.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.259369139585-465gq5i390ndt8sedrckefo34l6sevmb</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>259369139585-ne1kmi14l6m582m0om23d00nulb659lp.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBUp9838fbRTLyMcbctY50UapcaPYq6P1c</string>
+	<key>GCM_SENDER_ID</key>
+	<string>259369139585</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.swit91d08.swit</string>
+	<key>PROJECT_ID</key>
+	<string>swit-91d08</string>
+	<key>STORAGE_BUCKET</key>
+	<string>swit-91d08.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:259369139585:ios:e89218e72df8e0c9373c80</string>
+	<key>DATABASE_URL</key>
+	<string>https://swit-91d08-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

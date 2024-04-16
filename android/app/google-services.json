@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "259369139585",
+    "firebase_url": "https://swit-91d08-default-rtdb.firebaseio.com",
+    "project_id": "swit-91d08",
+    "storage_bucket": "swit-91d08.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:259369139585:android:e5d9b776f4c91ebe373c80",
+        "android_client_info": {
+          "package_name": "com.swit91d08.swit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "259369139585-ne1kmi14l6m582m0om23d00nulb659lp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swit91d08.swit",
+            "certificate_hash": "fed767892482a0c095339456a89381b6eb757bb9"
+          }
+        },
+        {
+          "client_id": "259369139585-c13ie222uc8s54a3ahp8l5rti7rf0ge7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCE52z13tufN-HvnXhrRaulA2BE548pS7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "259369139585-c13ie222uc8s54a3ahp8l5rti7rf0ge7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "259369139585-465gq5i390ndt8sedrckefo34l6sevmb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.swit91d08.swit"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
