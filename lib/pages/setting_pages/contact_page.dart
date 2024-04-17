@@ -70,7 +70,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    '名前:',
+                    '名前',
                     style: TextStyle(fontSize: 15, color: layout.mainText),
                   ),
                 ),
@@ -119,7 +119,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    'メールアドレス:',
+                    'メールアドレス',
                     style: TextStyle(fontSize: 15, color: layout.mainText),
                   ),
                 ),
@@ -170,7 +170,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    '件名:',
+                    '件名',
                     style: TextStyle(fontSize: 15, color: layout.mainText),
                   ),
                 ),
@@ -292,7 +292,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    'お問い合わせ内容:',
+                    'お問い合わせ内容',
                     style: TextStyle(fontSize: 15, color: layout.mainText),
                   ),
                 ),
