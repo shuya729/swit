@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SWiT Study</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
+
+    <style>
+      body {
+        background-color: #79c0f7;
+        color: #ffffff;
+      }
+
+      .navbar {
+        background-color: #2196f3;
+        color: #bce9fb;
+      }
+
+      .form-check-input:checked {
+        background-color: #2196f3;
+        border-color: #2196f3;
+      }
+
+      .btn {
+        background-color: #2196f3;
+        border-color: #2196f3;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="../index.html">SWiT Study</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="./terms.html">利用規約</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./privacy.html">プライバシーポリシー</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./contact.html">お問い合わせ</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="my-5">
+      <div class="container">
+        <h1 class="text-center mt-5">お問い合わせ</h1>
+        <form id="contactForm">
+          <div class="mb-3">
+            <label for="name" class="form-label">お名前</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">メールアドレス</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="subject" class="form-label">件名</label><br />
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="subject"
+                id="feedback"
+                value="0"
+                checked
+              />
+              <label class="form-check-label" for="feedback">ご意見</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="subject"
+                id="bug-report"
+                value="1"
+              />
+              <label class="form-check-label" for="bug-report"
+                >不具合報告</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="subject"
+                id="account-deletion"
+                value="2"
+              />
+              <label class="form-check-label" for="account-deletion"
+                >アカウント削除申請</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="subject"
+                id="other"
+                value="3"
+              />
+              <label class="form-check-label" for="other">その他</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="content" class="form-label">お問い合わせ内容</label>
+            <textarea
+              class="form-control"
+              id="content"
+              name="content"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+          <button id="submit" type="submit" class="btn btn-primary">
+            送信
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module">
+      import { addContacts } from "../js/firebase.js";
+
+      document
+        .getElementById("contactForm")
+        .addEventListener("submit", function (event) {
+          const submitBtn = document.getElementById("submit");
+          const name = document.getElementById("name").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const subject = parseInt(
+            document.querySelector('input[name="subject"]:checked').value,
+            10
+          );
+          const content = document.getElementById("content").value.trim();
+
+          if (!name || !email || subject == null || !content) {
+            alert("全ての項目を入力してください。");
+          } else if (!validateEmail(email)) {
+            alert("正しい形式のメールアドレスを入力してください。");
+          } else {
+            submitBtn.disabled = true;
+
+            addContacts(name, email, subject, content)
+              .then(function (docRef) {
+                alert("お問い合わせが完了しました。");
+                document.getElementById("contactForm").reset();
+              })
+              .catch(function (error) {
+                alert("お問い合わせ処理中にエラーが発生しました。");
+              })
+              .finally(function () {
+                submitBtn.disabled = false;
+              });
+          }
+
+          event.preventDefault();
+        });
+
+      function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+    </script>
+  </body>
+</html>
