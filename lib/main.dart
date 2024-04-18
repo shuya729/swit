@@ -67,6 +67,7 @@ class MyApp extends ConsumerWidget {
             final Config config = snapshot.data as Config;
             if (config.isMentenace) {
               return Scaffold(
+                resizeToAvoidBottomInset: true,
                 backgroundColor: layout.mainBack,
                 body: SafeArea(
                   child: Padding(
@@ -108,6 +109,7 @@ class MyApp extends ConsumerWidget {
               );
             } else if (config.isNeedUpdate) {
               return Scaffold(
+                resizeToAvoidBottomInset: true,
                 backgroundColor: layout.mainBack,
                 body: SafeArea(
                   child: Padding(
@@ -161,7 +163,8 @@ class MyApp extends ConsumerWidget {
             return const Main();
           } else {
             return Scaffold(
-              backgroundColor: Layout.def.mainBack,
+              resizeToAvoidBottomInset: true,
+              backgroundColor: layout.mainBack,
             );
           }
         },
@@ -222,13 +225,14 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
 
     if (layout == null) {
       return Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: Layout.def.mainBack,
       );
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: layout.mainBack,
-      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
           image: layout.image == null
@@ -294,6 +298,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
 
   Widget _termsPage(Layout layout, bool isPrivacy) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: layout.mainBack,
       body: SafeArea(child: TermsPage(isPrivacy, fromDialog: true)),
     );

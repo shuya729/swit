@@ -57,6 +57,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: 'お問い合わせ',
@@ -185,6 +186,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             value: 0,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
+                            activeColor: layout.subBack,
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 0),
                           ),
@@ -211,6 +213,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             value: 1,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
+                            activeColor: layout.subBack,
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 1),
                           ),
@@ -242,6 +245,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             value: 2,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
+                            activeColor: layout.subBack,
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 2),
                           ),
@@ -268,6 +272,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             value: 3,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
+                            activeColor: layout.subBack,
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 3),
                           ),
@@ -355,7 +360,10 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   ),
                   child: const Text('送信'),
                 ),
-                SizedBox(height: MediaQuery.of(context).padding.bottom + 50),
+                SizedBox(
+                  height:
+                      MediaQuery.of(context).padding.bottom + keyboardHeight,
+                ),
               ],
             ),
           ),

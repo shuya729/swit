@@ -37,6 +37,7 @@ class _NamePageState extends ConsumerState<NamePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: '名前',
@@ -101,23 +102,28 @@ class _NamePageState extends ConsumerState<NamePage> {
               ),
             ),
             const Spacer(flex: 2),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  final String name = _nameController.text.trim();
-                  LoadingDialog(_save(name)).show(context).then((_) {
-                    Navigator.of(context).pop();
-                  });
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
-                backgroundColor: layout.subBack,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            Container(
+              constraints: const BoxConstraints(minHeight: 50),
+              height: keyboardHeight,
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    final String name = _nameController.text.trim();
+                    LoadingDialog(_save(name)).show(context).then((_) {
+                      Navigator.of(context).pop();
+                    });
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: layout.subText,
+                  backgroundColor: layout.subBack,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                child: const Text('保存'),
               ),
-              child: const Text('保存'),
             ),
             const Spacer(),
             SizedBox(height: MediaQuery.of(context).padding.bottom)

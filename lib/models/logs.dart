@@ -110,12 +110,12 @@ class Logs implements Map<String, int> {
       final DateTime baseDate = DateTime(now.year, now.month, now.day);
       final int bgnDiff = baseDate.difference(bgn).inMilliseconds;
       final int nowDiff = now.difference(baseDate).inMilliseconds;
-      _data[bgnDateKey.key] = bgnDiff + (_data[bgnDateKey] ?? 0);
-      _data[nowDateKey.key] = nowDiff + (_data[nowDateKey] ?? 0);
+      _data[bgnDateKey.key] = bgnDiff + (_data[bgnDateKey.key] ?? 0);
+      _data[nowDateKey.key] = nowDiff + (_data[nowDateKey.key] ?? 0);
     } else {
       final DateKey dateKey = DateKey.fromDateTime(now);
       final int diff = now.difference(bgn).inMilliseconds;
-      _data[dateKey.key] = diff + (_data[dateKey] ?? 0);
+      _data[dateKey.key] = diff + (_data[dateKey.key] ?? 0);
     }
   }
 
