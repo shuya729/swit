@@ -36,8 +36,8 @@ class SignoutDialog extends ConsumerWidget {
             Text(
               'サインアウト',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
                 color: layout.mainText,
               ),
             ),
@@ -45,6 +45,7 @@ class SignoutDialog extends ConsumerWidget {
             Text(
               'サインアウトしますか？\n一部の機能が使用できなくなります。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),

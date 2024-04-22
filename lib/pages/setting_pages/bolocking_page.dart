@@ -72,6 +72,7 @@ class BlockingPage extends ConsumerWidget {
               child: Text(
                 'ブロック中のユーザーはいません。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -82,6 +83,7 @@ class BlockingPage extends ConsumerWidget {
               child: Text(
                 'エラーが発生しました。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -93,7 +95,7 @@ class BlockingPage extends ConsumerWidget {
                 width: 30,
                 height: 30,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 1,
                   color: layout.subText,
                   strokeCap: StrokeCap.round,
                 ),

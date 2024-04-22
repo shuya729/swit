@@ -72,14 +72,22 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   alignment: Alignment.bottomLeft,
                   child: Text(
                     '名前',
-                    style: TextStyle(fontSize: 15, color: layout.mainText),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 15,
+                      color: layout.mainText,
+                    ),
                   ),
                 ),
                 TextFormField(
                   controller: _nameController,
                   cursorHeight: 23,
                   cursorColor: layout.subBack,
-                  style: TextStyle(fontSize: 17, color: layout.mainText),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 17,
+                    color: layout.mainText,
+                  ),
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.all(5),
@@ -91,19 +99,24 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                     ),
                     hintText: '名前',
                     hintStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle:
-                        const TextStyle(fontSize: 13, color: Colors.red),
+                    errorStyle: const TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 13,
+                        color: Colors.red),
                     errorBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
                     focusedErrorBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
-                    counterStyle:
-                        TextStyle(fontSize: 12, color: layout.subText),
+                    counterStyle: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 12,
+                        color: layout.subText),
                   ),
                   validator: (value) {
                     value = value?.trim();
@@ -121,14 +134,20 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   alignment: Alignment.bottomLeft,
                   child: Text(
                     'メールアドレス',
-                    style: TextStyle(fontSize: 15, color: layout.mainText),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15,
+                        color: layout.mainText),
                   ),
                 ),
                 TextFormField(
                   controller: _emailController,
                   cursorHeight: 23,
                   cursorColor: layout.subBack,
-                  style: TextStyle(fontSize: 17, color: layout.mainText),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 17,
+                      color: layout.mainText),
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.all(5),
@@ -140,19 +159,24 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                     ),
                     hintText: 'メールアドレス',
                     hintStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle:
-                        const TextStyle(fontSize: 13, color: Colors.red),
+                    errorStyle: const TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 13,
+                        color: Colors.red),
                     errorBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
                     focusedErrorBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
-                    counterStyle:
-                        TextStyle(fontSize: 12, color: layout.subText),
+                    counterStyle: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 12,
+                        color: layout.subText),
                   ),
                   validator: (value) {
                     value = value?.trim();
@@ -172,7 +196,10 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   alignment: Alignment.bottomLeft,
                   child: Text(
                     '件名',
-                    style: TextStyle(fontSize: 15, color: layout.mainText),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15,
+                        color: layout.mainText),
                   ),
                 ),
                 Row(
@@ -199,7 +226,9 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             child: Text(
                               'ご意見',
                               style: TextStyle(
-                                  fontSize: 15, color: layout.mainText),
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: layout.mainText),
                             ),
                           )
                         ],
@@ -226,7 +255,9 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             child: Text(
                               '不具合報告',
                               style: TextStyle(
-                                  fontSize: 15, color: layout.mainText),
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: layout.mainText),
                             ),
                           ),
                         ],
@@ -258,7 +289,9 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             child: Text(
                               'アカウント削除申請',
                               style: TextStyle(
-                                  fontSize: 15, color: layout.mainText),
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: layout.mainText),
                             ),
                           ),
                         ],
@@ -285,7 +318,9 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             child: Text(
                               'その他',
                               style: TextStyle(
-                                  fontSize: 15, color: layout.mainText),
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: layout.mainText),
                             ),
                           ),
                         ],
@@ -298,7 +333,10 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   alignment: Alignment.bottomLeft,
                   child: Text(
                     'お問い合わせ内容',
-                    style: TextStyle(fontSize: 15, color: layout.mainText),
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15,
+                        color: layout.mainText),
                   ),
                 ),
                 TextFormField(
@@ -307,7 +345,10 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   controller: _contentController,
                   cursorHeight: 23,
                   cursorColor: layout.subBack,
-                  style: TextStyle(fontSize: 17, color: layout.mainText),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 17,
+                      color: layout.mainText),
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.all(5),
@@ -319,19 +360,24 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                     ),
                     hintText: 'お問い合わせ内容',
                     hintStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle:
-                        const TextStyle(fontSize: 13, color: Colors.red),
+                    errorStyle: const TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 13,
+                        color: Colors.red),
                     errorBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
                     focusedErrorBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.red),
                     ),
-                    counterStyle:
-                        TextStyle(fontSize: 12, color: layout.subText),
+                    counterStyle: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 12,
+                        color: layout.subText),
                   ),
                   validator: (value) {
                     value = value?.trim();

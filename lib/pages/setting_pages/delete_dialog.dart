@@ -59,8 +59,8 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               'アカウント削除',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
                 color: layout.mainText,
               ),
             ),
@@ -68,6 +68,7 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               'アカウントを削除しますか？\nログとフレンドに関する情報が完全に削除されます。\nこの操作は取り消せません。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),
@@ -76,6 +77,7 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               '上記の内容を了承の上、以下のボタンより再認証してアカウントを削除して下さい。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),
@@ -97,8 +99,8 @@ class DeleteDialog extends ConsumerWidget {
               child: const Text(
                 '削除する',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: Colors.red,
-                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

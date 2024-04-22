@@ -109,21 +109,21 @@ flutter:
 
 flutter_native_splash:
   image: "images/swit_splash_768.png"
-  color: "#79c0f7"
+  color: "#66c0b7"
   image_dark: "images/swit_splash_768.png"
-  color_dark: "#79c0f7"
+  color_dark: "#66c0b7"
   fullscreen: true
 
   android_12:
     image: "images/swit_splash_1152.png"
-    icon_background_color: "#79c0f7"
+    icon_background_color: "#66c0b7"
     image_dark: "images/swit_splash_1152.png"
-    icon_background_color_dark: "#79c0f7"
+    icon_background_color_dark: "#66c0b7"
 
 flutter_icons:
   android: "launcher_icon"
   ios: true
   image_path_ios: "images/swit_icon_1024.png"
   image_path_android: "images/swit_icon_1024.png"
-  adaptive_icon_background: "#79c0f7"
+  adaptive_icon_background: "#66c0b7"
   adaptive_icon_foreground: "images/swit_icon_512.png"

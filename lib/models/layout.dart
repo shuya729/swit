@@ -24,7 +24,7 @@ class Layout {
   static const double _subTextRate = 0.3;
 
   static Layout get def {
-    const Color defTheme = Colors.blue;
+    const Color defTheme = Colors.teal;
     return Layout(
       theme: defTheme,
       mainBack: Color.lerp(Colors.white, defTheme, _mainBackRate)!,

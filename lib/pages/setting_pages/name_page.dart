@@ -48,7 +48,10 @@ class _NamePageState extends ConsumerState<NamePage> {
             const Spacer(),
             Text(
               '名前を入力して下さい。',
-              style: TextStyle(fontSize: 16, color: layout.mainText),
+              style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  fontSize: 16,
+                  color: layout.mainText),
             ),
             Container(
               constraints: const BoxConstraints(
@@ -63,7 +66,10 @@ class _NamePageState extends ConsumerState<NamePage> {
                 maxLength: 20,
                 cursorHeight: 23,
                 cursorColor: layout.subBack,
-                style: TextStyle(fontSize: 17, color: layout.mainText),
+                style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 17,
+                    color: layout.mainText),
                 decoration: InputDecoration(
                   isDense: true,
                   contentPadding: const EdgeInsets.all(5),
@@ -75,17 +81,24 @@ class _NamePageState extends ConsumerState<NamePage> {
                   ),
                   hintText: '名前',
                   hintStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
                     fontSize: 17,
                     color: layout.subText,
                   ),
-                  errorStyle: const TextStyle(fontSize: 13, color: Colors.red),
+                  errorStyle: const TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 13,
+                      color: Colors.red),
                   errorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red),
                   ),
                   focusedErrorBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.red),
                   ),
-                  counterStyle: TextStyle(fontSize: 12, color: layout.subText),
+                  counterStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                      color: layout.subText),
                 ),
                 validator: (value) {
                   value = value?.trim();

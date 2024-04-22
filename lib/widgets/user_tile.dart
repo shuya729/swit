@@ -48,9 +48,9 @@ class UserTile extends ConsumerWidget {
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
+                    fontWeight: FontWeight.w300,
                     fontSize: 18,
                     color: Colors.red,
-                    fontWeight: FontWeight.normal,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -73,9 +73,9 @@ class UserTile extends ConsumerWidget {
               child: Text(
                 'キャンセル',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   fontSize: 18,
                   color: layout.subBack,
-                  fontWeight: FontWeight.normal,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -117,7 +117,7 @@ class UserTile extends ConsumerWidget {
           width: 15,
           height: 15,
           child: CircularProgressIndicator(
-            strokeWidth: 1.5,
+            strokeWidth: 1,
             color: layout.subText,
             strokeCap: StrokeCap.round,
           ),
@@ -254,6 +254,7 @@ class UserTile extends ConsumerWidget {
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 16,
                 ),

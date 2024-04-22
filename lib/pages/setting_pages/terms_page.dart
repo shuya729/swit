@@ -71,10 +71,7 @@ class TermsPage extends ConsumerWidget {
                             ? TextAlign.center
                             : TextAlign.left,
                     style: TextStyle(
-                      fontWeight: (term.type == TermsText.content ||
-                              term.type == TermsText.signature)
-                          ? FontWeight.normal
-                          : FontWeight.bold,
+                      fontWeight: FontWeight.w300,
                       fontSize: term.type == TermsText.title ? 20 : 14,
                       color: layout.mainText,
                     ),
@@ -87,6 +84,7 @@ class TermsPage extends ConsumerWidget {
               child: Text(
                 'エラーが発生しました。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -98,7 +96,7 @@ class TermsPage extends ConsumerWidget {
                 width: 30,
                 height: 30,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 1,
                   color: layout.subText,
                   strokeCap: StrokeCap.round,
                 ),

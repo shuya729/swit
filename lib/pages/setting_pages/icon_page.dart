@@ -62,7 +62,11 @@ class _IconPageState extends ConsumerState<IconPage> {
           const Spacer(),
           Text(
             'アイコン画像を選択して下さい。',
-            style: TextStyle(fontSize: 16, color: layout.mainText),
+            style: TextStyle(
+              fontWeight: FontWeight.w300,
+              fontSize: 16,
+              color: layout.mainText,
+            ),
           ),
           const SizedBox(height: 20),
           GestureDetector(
@@ -81,7 +85,11 @@ class _IconPageState extends ConsumerState<IconPage> {
                 ? null
                 : Text(
                     _error,
-                    style: const TextStyle(fontSize: 14, color: Colors.red),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 14,
+                      color: Colors.red,
+                    ),
                   ),
           ),
           const Spacer(flex: 2),

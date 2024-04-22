@@ -45,7 +45,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const SizedBox(height: 10),
           Text(
             'フレンドキーを入力して下さい。',
-            style: TextStyle(fontSize: 16, color: layout.mainText),
+            style: TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 16,
+                color: layout.mainText),
           ),
           const SizedBox(height: 5),
           Container(
@@ -54,7 +57,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             child: TextField(
               cursorHeight: 23,
               cursorColor: layout.subBack,
-              style: TextStyle(fontSize: 17, color: layout.mainText),
+              style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  fontSize: 17,
+                  color: layout.mainText),
               onChanged: (value) => setState(() => _key = value),
               decoration: InputDecoration(
                 isDense: true,
@@ -67,13 +73,17 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
                 hintText: 'フレンドキー',
                 hintStyle: TextStyle(
+                  fontWeight: FontWeight.w300,
                   fontSize: 17,
                   color: layout.subText,
                 ),
                 focusedErrorBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.red),
                 ),
-                counterStyle: TextStyle(fontSize: 12, color: layout.subText),
+                counterStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 12,
+                    color: layout.subText),
               ),
             ),
           ),
@@ -103,6 +113,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     child: Text(
                       '該当するユーザーが見つかりませんでした。',
                       style: TextStyle(
+                        fontWeight: FontWeight.w300,
                         color: layout.mainText,
                         fontSize: 15,
                       ),
@@ -113,6 +124,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     child: Text(
                       '検索時にエラーが発生しました。',
                       style: TextStyle(
+                        fontWeight: FontWeight.w300,
                         color: layout.mainText,
                         fontSize: 15,
                       ),
@@ -123,6 +135,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     child: Text(
                       'フレンドキーを6文字以上入力してください。',
                       style: TextStyle(
+                        fontWeight: FontWeight.w300,
                         color: layout.mainText,
                         fontSize: 15,
                       ),
@@ -134,7 +147,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       width: 30,
                       height: 30,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2,
+                        strokeWidth: 1,
                         color: layout.subText,
                         strokeCap: StrokeCap.round,
                       ),

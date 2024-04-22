@@ -54,7 +54,7 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
             width: 30,
             height: 30,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
+              strokeWidth: 1,
               color: layout.subText,
               strokeCap: StrokeCap.round,
             ),
@@ -116,9 +116,9 @@ class LicenseChild extends ConsumerWidget {
                   child: Text(
                     p.text,
                     style: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 14,
                       color: layout.mainText,
-                      // height: 1.2,
                     ),
                   ));
             }).toList(),

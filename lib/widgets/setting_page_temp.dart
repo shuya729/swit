@@ -58,12 +58,13 @@ class SettingPageTemp extends ConsumerWidget {
                               icon: Icon(
                                 Icons.arrow_back_ios,
                                 size: 18,
-                                color: layout.mainText,
+                                color: layout.subText,
                               ),
                             ),
                       Text(
                         title,
                         style: TextStyle(
+                          fontWeight: FontWeight.w300,
                           fontSize: 18,
                           color: layout.mainText,
                         ),
@@ -78,7 +79,7 @@ class SettingPageTemp extends ConsumerWidget {
                               icon: Icon(
                                 Icons.close,
                                 size: 22,
-                                color: layout.mainText,
+                                color: layout.subText,
                               ),
                             ),
                     ],
@@ -135,8 +136,8 @@ class SettingDialogTemp extends ConsumerWidget {
               Text(
                 title,
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
                   color: layout.mainText,
                 ),
               ),
@@ -145,6 +146,7 @@ class SettingDialogTemp extends ConsumerWidget {
                   ? Text(
                       description!,
                       style: TextStyle(
+                        fontWeight: FontWeight.w300,
                         fontSize: 14,
                         color: layout.mainText,
                       ),
