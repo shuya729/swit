@@ -24,7 +24,7 @@ class LogsPage extends ConsumerStatefulWidget {
 class _LogsPageState extends ConsumerState<LogsPage> {
   late List<UserData> _friends;
   late final ScrollController _scrollController;
-  int _expandedIndex = 0;
+  int? _expandedIndex = 0;
   double _preOffset = 0;
 
   @override
@@ -44,6 +44,8 @@ class _LogsPageState extends ConsumerState<LogsPage> {
     if (isExpanded) {
       _expandedIndex = panelIndex;
       _preOffset = _scrollController.offset;
+    } else {
+      _expandedIndex = null;
     }
     setState(() {
       _scrollController.animateTo(
@@ -201,12 +203,12 @@ class LogsWidget extends ConsumerWidget {
                   child: ListTile(
                     leading: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(19.2),
+                        borderRadius: BorderRadius.circular(19),
                         border: Border.all(
                           color: user.bgndt == null
                               ? Colors.transparent
                               : layout.mainText,
-                          width: 1.2,
+                          width: 1,
                         ),
                       ),
                       child: IconWidget(user.image, radius: 18),
@@ -284,6 +286,9 @@ class LogWidget extends ConsumerWidget {
     if (date.isAfter(now)) {
       return const SizedBox(height: 22, width: 22);
     }
+
+    // サンプル用のコード
+    // final double percent = Random().nextDouble();
 
     final int time = logs.gettime(DateKey.fromDateTime(date));
     final double percent = (time / _basetime).clamp(0.0, 1.0);

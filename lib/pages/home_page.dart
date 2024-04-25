@@ -125,15 +125,9 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
     super.dispose();
   }
 
-  // 本番環境用の広告ユニットID
   final String _adUnitId = Platform.isAndroid
       ? 'ca-app-pub-9057495563597980/5634855423'
       : 'ca-app-pub-9057495563597980/1328778904';
-
-  // テスト用の広告ユニットID
-  // final String _adUnitId = Platform.isAndroid
-  //     ? 'ca-app-pub-3940256099942544/2247696110'
-  //     : 'ca-app-pub-3940256099942544/3986624511';
 
   NativeTemplateStyle _nativeTemplateStyle(Layout layout) {
     return NativeTemplateStyle(
@@ -177,6 +171,14 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+
+    // サンプル用のコード
+    // return Container(
+    //   height: 105,
+    //   width: 320,
+    //   margin: const EdgeInsets.symmetric(horizontal: 10),
+    // );
+
     return Container(
       height: 105,
       width: 320,
@@ -185,7 +187,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       padding: const EdgeInsets.only(left: 15, top: 0, right: 7, bottom: 0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         border: layout.image != null
             ? null
             : Border.all(width: 0, color: layout.mainText),

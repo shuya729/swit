@@ -59,7 +59,7 @@ class RequestingPage extends ConsumerWidget {
             final List<UserData> users = snapshot.data!;
             return ListView.builder(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 10,
+                bottom: MediaQuery.of(context).padding.bottom + 40,
               ),
               itemCount: users.length,
               itemBuilder: (context, index) {

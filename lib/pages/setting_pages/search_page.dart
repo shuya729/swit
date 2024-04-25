@@ -37,67 +37,65 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: 'ユーザー検索',
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Text(
-            'フレンドキーを入力して下さい。',
-            style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 16,
-                color: layout.mainText),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap:
+            keyboardHeight > 0 ? () => FocusScope.of(context).unfocus() : null,
+        child: ListView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom + keyboardHeight + 40,
           ),
-          const SizedBox(height: 5),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            alignment: Alignment.center,
-            child: TextField(
-              cursorHeight: 23,
-              cursorColor: layout.subBack,
-              style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: 17,
-                  color: layout.mainText),
-              onChanged: (value) => setState(() => _key = value),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: const EdgeInsets.all(5),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: layout.subText),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: layout.subBack),
-                ),
-                hintText: 'フレンドキー',
-                hintStyle: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: 17,
-                  color: layout.subText,
-                ),
-                focusedErrorBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                ),
-                counterStyle: TextStyle(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              alignment: Alignment.center,
+              child: TextField(
+                keyboardType: TextInputType.text,
+                cursorHeight: 23,
+                cursorColor: layout.subBack,
+                style: TextStyle(
                     fontWeight: FontWeight.w300,
-                    fontSize: 12,
-                    color: layout.subText),
+                    fontSize: 17,
+                    color: layout.mainText),
+                onChanged: (value) => setState(() => _key = value),
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.all(5),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: layout.subText),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: layout.subBack),
+                  ),
+                  hintText: 'フレンドキー',
+                  hintStyle: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 17,
+                    color: layout.subText,
+                  ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: layout.error),
+                  ),
+                  counterStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 12,
+                      color: layout.subText),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: FutureBuilder(
+            const SizedBox(height: 10),
+            FutureBuilder(
               future: _search(_key),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   final List<UserData> users = snapshot.data!;
                   return ListView.builder(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 10,
-                    ),
+                    shrinkWrap: true,
                     itemCount: users.length,
                     itemBuilder: (context, index) {
                       final UserData user = users[index];
@@ -142,7 +140,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ),
                   );
                 } else {
-                  return Center(
+                  return Container(
+                    alignment: Alignment.bottomCenter,
+                    padding: const EdgeInsets.only(top: 15),
                     child: SizedBox(
                       width: 30,
                       height: 30,
@@ -156,8 +156,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 }
               },
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

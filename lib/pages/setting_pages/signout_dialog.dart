@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/layout.dart';
+import '../../models/presence.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/loading_dialog.dart';
 
@@ -18,6 +19,8 @@ class SignoutDialog extends ConsumerWidget {
 
   Future<void> _signOut() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
+    final Presence presence = Presence();
+    await presence.paused();
     await auth.signOut();
   }
 

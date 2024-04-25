@@ -47,10 +47,10 @@ class UserTile extends ConsumerWidget {
                   '${user.name} を報告',
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w300,
                     fontSize: 18,
-                    color: Colors.red,
+                    color: layout.error,
                     decoration: TextDecoration.none,
                   ),
                 ),

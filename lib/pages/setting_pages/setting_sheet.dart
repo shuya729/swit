@@ -226,7 +226,8 @@ class SettingSheet extends ConsumerWidget {
     return settingMenus;
   }
 
-  Widget _settingWidget(Layout layout, Map<String, List<Widget>> settingMenus) {
+  Widget _settingWidget(BuildContext context, Layout layout,
+      Map<String, List<Widget>> settingMenus) {
     final List<Widget> children = [];
     settingMenus.forEach((key, value) {
       children.addAll([
@@ -245,6 +246,9 @@ class SettingSheet extends ConsumerWidget {
       title: '設定',
       isRoot: true,
       child: ListView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         children: children,
       ),
     );
@@ -264,7 +268,7 @@ class SettingSheet extends ConsumerWidget {
         user: null,
         dataState: DataState.normal(),
       );
-      return _settingWidget(layout, settingMenus);
+      return _settingWidget(context, layout, settingMenus);
     } else if (myData == null) {
       final Map<String, List<Widget>> settingMenus = _getSettingMenus(
         context: context,
@@ -273,7 +277,7 @@ class SettingSheet extends ConsumerWidget {
         user: user,
         dataState: DataState.loading(),
       );
-      return _settingWidget(layout, settingMenus);
+      return _settingWidget(context, layout, settingMenus);
     } else {
       final Map<String, List<Widget>> settingMenus = _getSettingMenus(
         context: context,
@@ -282,7 +286,7 @@ class SettingSheet extends ConsumerWidget {
         user: user,
         dataState: DataState.normal(),
       );
-      return _settingWidget(layout, settingMenus);
+      return _settingWidget(context, layout, settingMenus);
     }
   }
 }

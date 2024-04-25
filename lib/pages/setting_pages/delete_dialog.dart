@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../models/layout.dart';
+import '../../models/presence.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/loading_dialog.dart';
 
@@ -36,11 +37,13 @@ class DeleteDialog extends ConsumerWidget {
   }
 
   Future<void> _delete() async {
+    final Presence presence = Presence();
     if (user.providerData[0].providerId == 'google.com') {
       await _reauthWithGoogle();
     } else if (user.providerData[0].providerId == 'apple.com') {
       await _reauthWithApple();
     } else {}
+    await presence.paused();
     await user.delete();
   }
 
@@ -96,11 +99,11 @@ class DeleteDialog extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 '削除する',
                 style: TextStyle(
                   fontWeight: FontWeight.w300,
-                  color: Colors.red,
+                  color: layout.error,
                 ),
               ),
             ),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -181,7 +180,7 @@ class Main extends ConsumerStatefulWidget {
 }
 
 class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
-  Presence _presence = const Presence(null);
+  final Presence _presence = Presence();
   late final PageController _pageController;
   double _opacity = 1.0;
 
@@ -195,10 +194,6 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
         _opacity = 1 -
             ((_pageController.offset - width) * 2 / width).abs().clamp(0, 1);
       });
-    });
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      _presence = Presence(user);
-      _presence.start();
     });
     WidgetsBinding.instance.addObserver(this);
   }

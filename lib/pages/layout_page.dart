@@ -44,9 +44,6 @@ class LayoutPage extends ConsumerWidget {
     final double width = MediaQuery.of(context).size.width;
     final double scale = calcScale(context);
 
-    print(
-        'r: ${layout.subBack.red}, g: ${layout.subBack.green}, b: ${layout.subBack.blue}');
-
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -97,7 +94,7 @@ class LayoutPage extends ConsumerWidget {
                             height: 26,
                             decoration: BoxDecoration(
                               color: color,
-                              borderRadius: BorderRadius.circular(13),
+                              borderRadius: BorderRadius.circular(9),
                               border: Border.all(
                                 width: 1,
                                 color: layout.theme == color
@@ -155,11 +152,16 @@ class BackImageSheet extends ConsumerWidget {
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedImage == null) return;
     final croppedImage = await ImageCropper().cropImage(
-      sourcePath: pickedImage.path,
-      aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 50,
-    );
+        sourcePath: pickedImage.path,
+        aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: '画像を編集',
+            hideBottomControls: true,
+          ),
+        ]);
     if (croppedImage == null) return;
     await notifier.changeImage(File(croppedImage.path));
   }
@@ -238,14 +240,14 @@ class BackImageSheet extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   color: layout.mainText.withOpacity(0.8),
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     '画像を削除',
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontWeight: FontWeight.w300,
                       fontSize: 18,
-                      color: Colors.red,
+                      color: layout.error,
                       decoration: TextDecoration.none,
                     ),
                   ),

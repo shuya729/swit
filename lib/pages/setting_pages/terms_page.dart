@@ -51,9 +51,10 @@ class TermsPage extends ConsumerWidget {
           if (snapshot.hasData) {
             final List<TermsText> terms = snapshot.data!;
             return ListView.builder(
-              itemCount: terms.length,
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom + 10),
+                bottom: MediaQuery.of(context).padding.bottom + 40,
+              ),
+              itemCount: terms.length,
               itemBuilder: (context, index) {
                 final TermsText term = terms[index];
                 return Padding(

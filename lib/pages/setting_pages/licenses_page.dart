@@ -66,6 +66,9 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
     return SettingPageTemp(
       title: 'ライセンス情報',
       child: ListView.builder(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         itemCount: packages.length,
         itemBuilder: (context, index) {
           final String package = packages.keys.toList()[index];

@@ -4,9 +4,15 @@ const { getStorage } = require("firebase-admin/storage");
 const { getDatabase } = require("firebase-admin/database");
 const { user } = require("firebase-functions/v1/auth");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { onValueUpdated } = require("firebase-functions/v2/database");
+const {
+  onValueCreated,
+  onValueDeleted,
+} = require("firebase-functions/v2/database");
 
 initializeApp();
+
+const timezone = "Asia/Tokyo";
+process.env.TZ = timezone;
 
 const firestore = getFirestore();
 const storage = getStorage();
@@ -28,6 +34,9 @@ exports.createFunction = user().onCreate(async (user) => {
 });
 
 exports.deleteFunction = user().onDelete(async (user) => {
+  const userRef = firestore.collection("users").doc(user.uid);
+  await userRef.delete();
+
   const statesQuery = firestore
     .collection("friends")
     .where(user.uid, "in", [
@@ -37,33 +46,32 @@ exports.deleteFunction = user().onDelete(async (user) => {
       "blocked",
       "blocking",
     ]);
-  await firestore.runTransaction(async (t) => {
-    const statesDocs = await t.get(statesQuery);
-    if (!statesDocs.empty) {
-      statesDocs.forEach((doc) => {
-        t.update(doc.ref, { [user.uid]: FieldValue.delete() });
-      });
-    }
-  });
+  const statesDocs = await statesQuery.get();
 
-  const friendsRef = firestore.collection("friends").doc(user.uid);
-  await friendsRef.delete();
-
-  const batch = firestore.batch();
   const logsRef = firestore
     .collection("users")
     .doc(user.uid)
     .collection("logs");
   const logsDocs = await logsRef.get();
+
+  const batch = firestore.batch();
+
+  if (!statesDocs.empty) {
+    statesDocs.forEach((doc) => {
+      batch.update(doc.ref, { [user.uid]: FieldValue.delete() });
+    });
+  }
+
   if (!logsDocs.empty) {
     logsDocs.forEach((doc) => {
       batch.delete(doc.ref);
     });
   }
-  await batch.commit();
 
-  const userRef = firestore.collection("users").doc(user.uid);
-  await userRef.delete();
+  const friendsRef = firestore.collection("friends").doc(user.uid);
+  batch.delete(friendsRef);
+
+  await batch.commit();
 
   const iconImage = storage.bucket().file(`users/${user.uid}/iconImage.jpg`);
   if (iconImage.exists()) {
@@ -130,10 +138,55 @@ exports.requestFunction = onDocumentCreated(
   }
 );
 
-exports.presenceFunction = onValueUpdated("/users/{uid}", async (event) => {
+exports.presenceFunction = onValueCreated(
+  "/users/{uid}/{conId}",
+  async (event) => {
+    const uid = event.params.uid;
+    const now = new Date();
+    const userRef = firestore.collection("users").doc(uid);
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return;
+    const bgndt = userDoc.data().bgndt;
+    if (bgndt === null) {
+      userRef.update({ bgndt: now, upddt: now });
+      return;
+    }
+    const snapshot = await event.data.ref.parent
+      .orderByValue()
+      .startAt(now.getTime() - 4000000)
+      .get();
+    if (!snapshot.exists() || snapshot.numChildren() > 1) return;
+    userRef.update({ bgndt: now, upddt: now });
+  }
+);
+
+exports.logFunction = onValueDeleted("/users/{uid}/{conId}", async (event) => {
   const uid = event.params.uid;
-  const before = event.data.before.val();
-  const after = event.data.after.val();
+  const now = new Date();
+  const userRef = firestore.collection("users").doc(uid);
+  const snapshot = await event.data.ref.parent
+    .orderByValue()
+    .startAt(now.getTime() - 4000000)
+    .get();
+  if (snapshot.exists()) return;
+  const userDoc = await userRef.get();
+  if (!userDoc.exists) return;
+  const bgndt = userDoc.data().bgndt;
+  if (bgndt === null) return;
+  userRef.update({ bgndt: null, upddt: now });
+
+  const bgn = bgndt.toDate();
+  const logs = calcLogs(bgn, now);
+  const batch = firestore.batch();
+  Object.keys(logs).forEach((key) => {
+    const logRef = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("logs")
+      .doc(key);
+    batch.set(logRef, logs[key], { merge: true });
+  });
+  await batch.commit();
 
   function getMonthKey(date) {
     const year = date.getFullYear();
@@ -148,96 +201,38 @@ exports.presenceFunction = onValueUpdated("/users/{uid}", async (event) => {
     return `${year}-${month}-${day}`;
   }
 
-  if (before === after) return;
-
-  const now = new Date();
-  const userRef = firestore.collection("users").doc(uid);
-
-  if (before === false && after === true) {
-    await userRef.update({ bgndt: now, upddt: now });
-  } else if (before === true && after === false) {
-    firestore.runTransaction(async (t) => {
-      const userDoc = await t.get(userRef);
-      const bgndt = userDoc.data().bgndt;
-
-      if (bgndt === null) return;
-      t.update(userRef, { bgndt: null, upddt: now });
-
-      const bgn = bgndt.toDate();
+  function calcLogs(bgn, now) {
+    if (bgn.getTime() > now.getTime()) return {};
+    if (
+      bgn.getFullYear() !== now.getFullYear() ||
+      bgn.getMonth() !== now.getMonth() ||
+      bgn.getDate() !== now.getDate()
+    ) {
+      const monthKey = getMonthKey(bgn);
+      const dateKey = getDateKey(bgn);
+      const baseDate = new Date(
+        bgn.getFullYear(),
+        bgn.getMonth(),
+        bgn.getDate() + 1
+      );
+      const diff = baseDate.getTime() - bgn.getTime();
+      return {
+        [monthKey]: {
+          monthKey: monthKey,
+          [dateKey]: FieldValue.increment(diff),
+        },
+        ...calcLogs(baseDate, now),
+      };
+    } else {
+      const monthKey = getMonthKey(bgn);
+      const dateKey = getDateKey(bgn);
       const diff = now.getTime() - bgn.getTime();
-      if (diff < 0 || 24 * 60 * 60 * 1000 < diff) return;
-
-      if (now.getMonth !== bgn.getMonth) {
-        const nowMonthKey = getMonthKey(now);
-        const bgnMonthKey = getMonthKey(bgn);
-        const nowDateKey = getDateKey(now);
-        const bgnDateKey = getDateKey(bgn);
-        const nowDiff =
-          now.getTime() -
-          new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const bgnDiff =
-          new Date(bgn.getFullYear(), bgn.getMonth(), bgn.getDate()).getTime() -
-          bgn.getTime();
-        t.set(
-          firestore
-            .collection("users")
-            .doc(uid)
-            .collection("logs")
-            .doc(nowMonthKey),
-          {
-            monthKey: nowMonthKey,
-            [nowDateKey]: FieldValue.increment(nowDiff),
-          },
-          { merge: true }
-        );
-        t.set(
-          firestore
-            .collection("users")
-            .doc(uid)
-            .collection("logs")
-            .doc(bgnMonthKey),
-          {
-            monthKey: bgnMonthKey,
-            [bgnDateKey]: FieldValue.increment(bgnDiff),
-          },
-          { merge: true }
-        );
-      } else if (now.getDate !== bgn.getDate) {
-        const monthKey = getMonthKey(now);
-        const nowDateKey = getDateKey(now);
-        const bgnDateKey = getDateKey(bgn);
-        const nowDiff =
-          now.getTime() -
-          new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-        const bgnDiff =
-          new Date(bgn.getFullYear(), bgn.getMonth(), bgn.getDate()).getTime() -
-          bgn.getTime();
-        t.set(
-          firestore
-            .collection("users")
-            .doc(uid)
-            .collection("logs")
-            .doc(monthKey),
-          {
-            monthKey: monthKey,
-            [nowDateKey]: FieldValue.increment(nowDiff),
-            [bgnDateKey]: FieldValue.increment(bgnDiff),
-          },
-          { merge: true }
-        );
-      } else {
-        const monthKey = getMonthKey(now);
-        const dateKey = getDateKey(now);
-        t.set(
-          firestore
-            .collection("users")
-            .doc(uid)
-            .collection("logs")
-            .doc(monthKey),
-          { monthKey: monthKey, [dateKey]: FieldValue.increment(diff) },
-          { merge: true }
-        );
-      }
-    });
+      return {
+        [monthKey]: {
+          monthKey: monthKey,
+          [dateKey]: FieldValue.increment(diff),
+        },
+      };
+    }
   }
 });

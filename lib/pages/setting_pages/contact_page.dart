@@ -61,12 +61,20 @@ class _ContactPageState extends ConsumerState<ContactPage> {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: 'お問い合わせ',
-      child: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: keyboardHeight > 0
+              ? () => FocusScope.of(context).unfocus()
+              : null,
           child: Form(
             key: _formKey,
-            child: Column(
+            child: ListView(
+              padding: EdgeInsets.only(
+                bottom:
+                    MediaQuery.of(context).padding.bottom + keyboardHeight + 40,
+              ),
               children: [
                 Align(
                   alignment: Alignment.bottomLeft,
@@ -81,6 +89,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 ),
                 TextFormField(
                   controller: _nameController,
+                  keyboardType: TextInputType.name,
                   cursorHeight: 23,
                   cursorColor: layout.subBack,
                   style: TextStyle(
@@ -103,15 +112,16 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 13,
-                        color: Colors.red),
-                    errorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 13,
+                      color: layout.error,
                     ),
-                    focusedErrorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
+                    ),
+                    focusedErrorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
                     ),
                     counterStyle: TextStyle(
                         fontWeight: FontWeight.w300,
@@ -142,6 +152,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                 ),
                 TextFormField(
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   cursorHeight: 23,
                   cursorColor: layout.subBack,
                   style: TextStyle(
@@ -163,15 +174,16 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 13,
-                        color: Colors.red),
-                    errorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 13,
+                      color: layout.error,
                     ),
-                    focusedErrorBorder: const UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
+                    ),
+                    focusedErrorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
                     ),
                     counterStyle: TextStyle(
                         fontWeight: FontWeight.w300,
@@ -364,15 +376,16 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                       fontSize: 17,
                       color: layout.subText,
                     ),
-                    errorStyle: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 13,
-                        color: Colors.red),
-                    errorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 13,
+                      color: layout.error,
                     ),
-                    focusedErrorBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.red),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: layout.error),
                     ),
                     counterStyle: TextStyle(
                         fontWeight: FontWeight.w300,
@@ -389,26 +402,24 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                   },
                 ),
                 const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      LoadingDialog(_send()).show(context).then((_) {
-                        Navigator.pop(context);
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: layout.subText,
-                    backgroundColor: layout.subBack,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        LoadingDialog(_send()).show(context).then((_) {
+                          Navigator.pop(context);
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: layout.subText,
+                      backgroundColor: layout.subBack,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    child: const Text('送信'),
                   ),
-                  child: const Text('送信'),
-                ),
-                SizedBox(
-                  height:
-                      MediaQuery.of(context).padding.bottom + keyboardHeight,
                 ),
               ],
             ),
