@@ -13,12 +13,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore-compat.js"></script>
 
+    <link rel="icon" href="../img/favicon.ico" />
     <link rel="stylesheet" href="../css/style.css" type="text/css" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
       <div class="container">
-        <a class="navbar-brand" href="../index.html">SWiT Study</a>
+        <a class="navbar-brand" href="../">SWiT Study</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -49,89 +50,91 @@
     <main class="my-5">
       <div class="container">
         <h1 class="text-center mt-5">お問い合わせ</h1>
-        <form id="contactForm">
-          <div class="mb-3">
-            <label for="name" class="form-label">お名前</label>
-            <input
-              type="text"
-              class="form-control"
-              id="name"
-              name="name"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">メールアドレス</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              required
-            />
-          </div>
-          <div class="mb-3">
-            <label for="subject" class="form-label">件名</label><br />
-            <div class="form-check form-check-inline">
+        <div class="container" style="max-width: 500px">
+          <form id="contactForm">
+            <div class="mb-3">
+              <label for="name" class="form-label">お名前</label>
               <input
-                class="form-check-input"
-                type="radio"
-                name="subject"
-                id="feedback"
-                value="0"
-                checked
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                required
               />
-              <label class="form-check-label" for="feedback">ご意見</label>
             </div>
-            <div class="form-check form-check-inline">
+            <div class="mb-3">
+              <label for="email" class="form-label">メールアドレス</label>
               <input
-                class="form-check-input"
-                type="radio"
-                name="subject"
-                id="bug-report"
-                value="1"
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
               />
-              <label class="form-check-label" for="bug-report"
-                >不具合報告</label
-              >
             </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="subject"
-                id="account-deletion"
-                value="2"
-              />
-              <label class="form-check-label" for="account-deletion"
-                >アカウント削除申請</label
-              >
+            <div class="mb-3">
+              <label for="subject" class="form-label">件名</label><br />
+              <div class="form-check form-check-inline">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="subject"
+                  id="feedback"
+                  value="0"
+                  checked
+                />
+                <label class="form-check-label" for="feedback">ご意見</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="subject"
+                  id="bug-report"
+                  value="1"
+                />
+                <label class="form-check-label" for="bug-report"
+                  >不具合報告</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="subject"
+                  id="account-deletion"
+                  value="2"
+                />
+                <label class="form-check-label" for="account-deletion"
+                  >アカウント削除申請</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="subject"
+                  id="other"
+                  value="3"
+                />
+                <label class="form-check-label" for="other">その他</label>
+              </div>
             </div>
-            <div class="form-check form-check-inline">
-              <input
-                class="form-check-input"
-                type="radio"
-                name="subject"
-                id="other"
-                value="3"
-              />
-              <label class="form-check-label" for="other">その他</label>
+            <div class="mb-3">
+              <label for="content" class="form-label">お問い合わせ内容</label>
+              <textarea
+                class="form-control"
+                id="content"
+                name="content"
+                rows="4"
+                required
+              ></textarea>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="content" class="form-label">お問い合わせ内容</label>
-            <textarea
-              class="form-control"
-              id="content"
-              name="content"
-              rows="4"
-              required
-            ></textarea>
-          </div>
-          <button id="submit" type="submit" class="btn btn-primary">
-            送信
-          </button>
-        </form>
+            <button id="submit" type="submit" class="btn btn-primary">
+              送信
+            </button>
+          </form>
+        </div>
       </div>
     </main>
 
