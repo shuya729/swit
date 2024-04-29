@@ -57,55 +57,72 @@ class _IconPageState extends ConsumerState<IconPage> {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: 'アイコン画像',
-      child: Column(
+      child: ListView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         children: [
-          const Spacer(),
-          Text(
-            'アイコン画像を選択して下さい。',
-            style: TextStyle(fontSize: 16, color: layout.mainText),
-          ),
-          const SizedBox(height: 20),
-          GestureDetector(
-            onTap: () => LoadingDialog(_pickImage()).show(context),
-            child: _imageFile == null
-                ? IconWidget(widget.myData.image, radius: 40)
-                : CircleAvatar(
-                    radius: 40,
-                    backgroundImage: Image.file(_imageFile!).image,
-                  ),
-          ),
           const SizedBox(height: 15),
-          SizedBox(
-            height: 15,
-            child: _error.isEmpty
-                ? null
-                : Text(
-                    _error,
-                    style: const TextStyle(fontSize: 14, color: Colors.red),
-                  ),
-          ),
-          const Spacer(flex: 2),
-          ElevatedButton(
-            onPressed: () {
-              if (_imageFile == null) {
-                setState(() => _error = '画像が選択されていません。');
-              } else {
-                LoadingDialog(_save(_imageFile!)).show(context).then((_) {
-                  Navigator.of(context).pop();
-                });
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: layout.subText,
-              backgroundColor: layout.subBack,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Center(
+            child: Text(
+              'アイコン画像を選択して下さい。',
+              style: TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 16,
+                color: layout.mainText,
               ),
             ),
-            child: const Text('保存'),
           ),
-          const Spacer(),
-          SizedBox(height: MediaQuery.of(context).padding.bottom)
+          const SizedBox(height: 20),
+          Center(
+            child: GestureDetector(
+              onTap: () => LoadingDialog(_pickImage()).show(context),
+              child: _imageFile == null
+                  ? IconWidget(widget.myData.image, radius: 40)
+                  : CircleAvatar(
+                      radius: 40,
+                      backgroundImage: Image.file(_imageFile!).image,
+                    ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: SizedBox(
+              height: 20,
+              child: _error.isEmpty
+                  ? null
+                  : Text(
+                      _error,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 14,
+                        color: layout.error,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 40),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                if (_imageFile == null) {
+                  setState(() => _error = '新しい画像が選択されていません。');
+                } else {
+                  LoadingDialog(_save(_imageFile!)).show(context).then((_) {
+                    Navigator.of(context).pop();
+                  });
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: layout.mainText,
+                backgroundColor: layout.subBack,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('保存'),
+            ),
+          ),
         ],
       ),
     );

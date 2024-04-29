@@ -37,91 +37,115 @@ class _NamePageState extends ConsumerState<NamePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
       title: '名前',
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            const Spacer(),
-            Text(
-              '名前を入力して下さい。',
-              style: TextStyle(fontSize: 16, color: layout.mainText),
-            ),
-            Container(
-              constraints: const BoxConstraints(
-                minWidth: 200,
-                maxWidth: 400,
-                minHeight: 80,
-                maxHeight: 80,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: keyboardHeight > 0
+              ? () => FocusScope.of(context).unfocus()
+              : null,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.only(
+                bottom:
+                    MediaQuery.of(context).padding.bottom + keyboardHeight + 40,
               ),
-              alignment: Alignment.center,
-              child: TextFormField(
-                controller: _nameController,
-                maxLength: 20,
-                cursorHeight: 23,
-                cursorColor: layout.subBack,
-                style: TextStyle(fontSize: 17, color: layout.mainText),
-                decoration: InputDecoration(
-                  isDense: true,
-                  contentPadding: const EdgeInsets.all(5),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: layout.subText),
+              children: [
+                const SizedBox(height: 15),
+                Center(
+                  child: Text(
+                    '名前を入力して下さい。',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 16,
+                        color: layout.mainText),
                   ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: layout.subBack),
-                  ),
-                  hintText: '名前',
-                  hintStyle: TextStyle(
-                    fontSize: 17,
-                    color: layout.subText,
-                  ),
-                  errorStyle: const TextStyle(fontSize: 13, color: Colors.red),
-                  errorBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red),
-                  ),
-                  focusedErrorBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red),
-                  ),
-                  counterStyle: TextStyle(fontSize: 12, color: layout.subText),
                 ),
-                validator: (value) {
-                  value = value?.trim();
-                  if (value == null || value.isEmpty) {
-                    return '名前を入力してください。';
-                  } else if (value.length > 20) {
-                    return '名前は20文字以内で入力してください。';
-                  } else if (value == widget.myData.name) {
-                    return '変更がありません。';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-            ),
-            const Spacer(flex: 2),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  final String name = _nameController.text.trim();
-                  LoadingDialog(_save(name)).show(context).then((_) {
-                    Navigator.of(context).pop();
-                  });
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
-                backgroundColor: layout.subBack,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 20),
+                Center(
+                  child: TextFormField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.text,
+                    maxLength: 20,
+                    cursorHeight: 23,
+                    cursorColor: layout.subBack,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 17,
+                        color: layout.mainText),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.all(5),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: layout.subText),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: layout.subBack),
+                      ),
+                      hintText: '名前',
+                      hintStyle: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 17,
+                        color: layout.subText,
+                      ),
+                      errorStyle: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 13,
+                          color: layout.error),
+                      errorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: layout.error),
+                      ),
+                      focusedErrorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: layout.error),
+                      ),
+                      counterStyle: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 12,
+                          color: layout.subText),
+                    ),
+                    validator: (value) {
+                      value = value?.trim();
+                      if (value == null || value.isEmpty) {
+                        return '名前を入力してください。';
+                      } else if (value.length > 20) {
+                        return '名前は20文字以内で入力してください。';
+                      } else if (value == widget.myData.name) {
+                        return '変更がありません。';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
                 ),
-              ),
-              child: const Text('保存'),
+                const SizedBox(height: 60),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final String name = _nameController.text.trim();
+                        LoadingDialog(_save(name)).show(context).then((_) {
+                          Navigator.of(context).pop();
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: layout.mainText,
+                      backgroundColor: layout.subBack,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('保存'),
+                  ),
+                ),
+              ],
             ),
-            const Spacer(),
-            SizedBox(height: MediaQuery.of(context).padding.bottom)
-          ],
+          ),
         ),
       ),
     );

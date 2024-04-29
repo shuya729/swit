@@ -22,13 +22,15 @@ class LogsPage extends ConsumerStatefulWidget {
 }
 
 class _LogsPageState extends ConsumerState<LogsPage> {
+  late List<UserData> _friends;
   late final ScrollController _scrollController;
-  int _expandedIndex = 0;
+  int? _expandedIndex = 0;
   double _preOffset = 0;
 
   @override
   void initState() {
     super.initState();
+    _friends = ref.read(friendsProvider);
     _scrollController = ScrollController(initialScrollOffset: 50);
   }
 
@@ -42,6 +44,8 @@ class _LogsPageState extends ConsumerState<LogsPage> {
     if (isExpanded) {
       _expandedIndex = panelIndex;
       _preOffset = _scrollController.offset;
+    } else {
+      _expandedIndex = null;
     }
     setState(() {
       _scrollController.animateTo(
@@ -63,17 +67,12 @@ class _LogsPageState extends ConsumerState<LogsPage> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(10),
-        child: CustomScrollView(
+        child: ListView(
           controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              expandedHeight: 50,
-              collapsedHeight: 50,
-              toolbarHeight: 50,
-              backgroundColor: Colors.transparent,
-              flexibleSpace: Column(
+          children: [
+            SizedBox(
+              height: 50,
+              child: Column(
                 children: [
                   Expanded(
                     child: Padding(
@@ -84,8 +83,8 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                           Text(
                             'ログ',
                             style: TextStyle(
+                              fontWeight: FontWeight.w300,
                               fontSize: 20,
-                              fontWeight: FontWeight.w600,
                               color: layout.mainText,
                             ),
                           ),
@@ -103,9 +102,9 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                               );
                             },
                             icon: Icon(
-                              Icons.settings,
+                              Icons.settings_outlined,
                               size: 23,
-                              color: layout.mainText,
+                              color: layout.subText,
                             ),
                           ),
                         ],
@@ -121,10 +120,11 @@ class _LogsPageState extends ConsumerState<LogsPage> {
               ),
             ),
             LogsWidget(
+              friends: _friends,
               bodyHeight: bodyHeight,
               callBack: _callBack,
               expandIndex: _expandedIndex,
-            )
+            ),
           ],
         ),
       ),
@@ -135,10 +135,12 @@ class _LogsPageState extends ConsumerState<LogsPage> {
 class LogsWidget extends ConsumerWidget {
   const LogsWidget({
     super.key,
+    required this.friends,
     required this.bodyHeight,
     required this.callBack,
     required this.expandIndex,
   });
+  final List<UserData> friends;
   final double bodyHeight;
   final Function(int, bool) callBack;
   final int? expandIndex;
@@ -148,15 +150,15 @@ class LogsWidget extends ConsumerWidget {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final User? user = ref.watch(authProvider);
     final UserData? myData = ref.watch(myDataProvider);
-    final List<UserData> frineds = ref.watch(friendsProvider);
 
     if (user == null) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
+      return SizedBox(
+        height: bodyHeight,
         child: Center(
           child: Text(
             'サインインが必要です。',
             style: TextStyle(
+              fontWeight: FontWeight.w300,
               color: layout.mainText,
               fontSize: 16,
             ),
@@ -164,63 +166,73 @@ class LogsWidget extends ConsumerWidget {
         ),
       );
     } else if (myData == null) {
-      return SliverFillRemaining(
-        hasScrollBody: false,
+      return SizedBox(
+        height: bodyHeight,
         child: Center(
           child: SizedBox(
-            height: 60,
-            width: 60,
+            width: 40,
+            height: 40,
             child: CircularProgressIndicator(
-              strokeWidth: 3,
-              color: layout.mainText,
+              strokeWidth: 1.5,
+              color: layout.subText,
               strokeCap: StrokeCap.round,
             ),
           ),
         ),
       );
     } else {
-      return SliverToBoxAdapter(
-        child: ExpansionPanelList.radio(
-          initialOpenPanelValue: 0,
-          elevation: 0,
-          materialGapSize: 0,
-          dividerColor: Colors.transparent,
-          expandIconColor: layout.mainText,
-          expandedHeaderPadding: const EdgeInsets.all(0),
-          expansionCallback: callBack,
-          children: List.generate(
-            frineds.length + 1,
-            (index) {
-              final UserData user = index == 0 ? myData : frineds[index - 1];
-              return ExpansionPanelRadio(
-                value: index,
-                canTapOnHeader: true,
-                backgroundColor: Colors.transparent,
-                headerBuilder: (context, isExpanded) {
-                  return SizedBox(
-                    height: 50,
-                    child: ListTile(
-                      leading: IconWidget(user.image, radius: 18),
-                      title: Text(
-                        user.name,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: layout.mainText,
-                          fontSize: 18,
+      return ExpansionPanelList.radio(
+        initialOpenPanelValue: 0,
+        elevation: 0,
+        materialGapSize: 0,
+        dividerColor: Colors.transparent,
+        expandIconColor: layout.subText,
+        expandedHeaderPadding: const EdgeInsets.all(0),
+        expansionCallback: callBack,
+        children: List.generate(
+          friends.length + 1,
+          (index) {
+            final UserData user = index == 0 ? myData : friends[index - 1];
+            return ExpansionPanelRadio(
+              value: index,
+              canTapOnHeader: true,
+              backgroundColor: Colors.transparent,
+              headerBuilder: (context, isExpanded) {
+                return SizedBox(
+                  height: 50,
+                  child: ListTile(
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(19),
+                        border: Border.all(
+                          color: user.bgndt == null
+                              ? Colors.transparent
+                              : layout.mainText,
+                          width: 1,
                         ),
                       ),
+                      child: IconWidget(user.image, radius: 18),
                     ),
-                  );
-                },
-                body: LogWidget(
-                  opened: expandIndex == index,
-                  user: user,
-                  bodyHeight: bodyHeight,
-                ),
-              );
-            },
-          ),
+                    title: Text(
+                      user.name,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        color: layout.mainText,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              body: LogWidget(
+                opened: expandIndex == index,
+                user: user,
+                bodyHeight: bodyHeight,
+              ),
+            );
+          },
         ),
       );
     }
@@ -235,6 +247,7 @@ class LogWidget extends ConsumerWidget {
     required this.bodyHeight,
   }) {
     now = DateTime.now();
+    // now = DateTime(2024, 4, 1); // サンプル用のコード
     logsFuture = _loadLogs(user, now);
   }
   final bool opened;
@@ -275,6 +288,9 @@ class LogWidget extends ConsumerWidget {
       return const SizedBox(height: 22, width: 22);
     }
 
+    // // サンプル用のコード
+    // final double percent = Random().nextDouble();
+
     final int time = logs.gettime(DateKey.fromDateTime(date));
     final double percent = (time / _basetime).clamp(0.0, 1.0);
     return Container(
@@ -302,6 +318,7 @@ class LogWidget extends ConsumerWidget {
             child: Text(
               _weekDays[index],
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 color: layout.mainText,
                 fontSize: 13,
               ),
@@ -326,6 +343,7 @@ class LogWidget extends ConsumerWidget {
           child: Text(
             '${lastDate.month}月',
             style: TextStyle(
+              fontWeight: FontWeight.w300,
               color: layout.mainText,
               fontSize: 13,
             ),
@@ -407,8 +425,11 @@ class LogWidget extends ConsumerWidget {
                         alignment: Alignment.bottomLeft,
                         child: Text(
                           '今日',
-                          style:
-                              TextStyle(fontSize: 16, color: layout.mainText),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 16,
+                            color: layout.mainText,
+                          ),
                         ),
                       ),
                       Align(
@@ -416,8 +437,12 @@ class LogWidget extends ConsumerWidget {
                         child: Text(
                           Logs.formattime(
                               logs.gettime(DateKey.fromDateTime(now))),
-                          style:
-                              TextStyle(fontSize: 17, color: layout.mainText),
+                          // Logs.formattime(12000000), // サンプル用のコード
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 17,
+                            color: layout.mainText,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -425,16 +450,23 @@ class LogWidget extends ConsumerWidget {
                         alignment: Alignment.bottomLeft,
                         child: Text(
                           '${now.month}月',
-                          style:
-                              TextStyle(fontSize: 16, color: layout.mainText),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 16,
+                            color: layout.mainText,
+                          ),
                         ),
                       ),
                       Align(
                         alignment: Alignment.topCenter,
                         child: Text(
                           Logs.formattime(logs.getMonthtime(now)),
-                          style:
-                              TextStyle(fontSize: 17, color: layout.mainText),
+                          // Logs.formattime(12000000), // サンプル用のコード
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 17,
+                            color: layout.mainText,
+                          ),
                         ),
                       ),
                     ],
@@ -446,16 +478,17 @@ class LogWidget extends ConsumerWidget {
             return Text(
               'エラーが発生しました。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 color: layout.mainText,
                 fontSize: 16,
               ),
             );
           } else {
             return SizedBox(
-              width: 50,
-              height: 50,
+              width: 40,
+              height: 40,
               child: CircularProgressIndicator(
-                strokeWidth: 2.5,
+                strokeWidth: 1.5,
                 color: layout.subText,
                 strokeCap: StrokeCap.round,
               ),

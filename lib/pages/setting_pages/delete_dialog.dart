@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../models/layout.dart';
+import '../../models/presence.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/loading_dialog.dart';
 
@@ -36,11 +37,13 @@ class DeleteDialog extends ConsumerWidget {
   }
 
   Future<void> _delete() async {
+    final Presence presence = Presence();
     if (user.providerData[0].providerId == 'google.com') {
       await _reauthWithGoogle();
     } else if (user.providerData[0].providerId == 'apple.com') {
       await _reauthWithApple();
     } else {}
+    await presence.paused();
     await user.delete();
   }
 
@@ -59,8 +62,8 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               'アカウント削除',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
                 color: layout.mainText,
               ),
             ),
@@ -68,6 +71,7 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               'アカウントを削除しますか？\nログとフレンドに関する情報が完全に削除されます。\nこの操作は取り消せません。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),
@@ -76,6 +80,7 @@ class DeleteDialog extends ConsumerWidget {
             Text(
               '上記の内容を了承の上、以下のボタンより再認証してアカウントを削除して下さい。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),
@@ -88,19 +93,13 @@ class DeleteDialog extends ConsumerWidget {
                 });
               },
               style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
+                foregroundColor: layout.error,
                 backgroundColor: layout.subBack,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                '削除する',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: const Text('削除する'),
             ),
           ],
         ),

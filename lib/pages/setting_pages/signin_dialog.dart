@@ -52,8 +52,8 @@ class SigninDialog extends ConsumerWidget {
             Text(
               'サインイン',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
                 color: layout.mainText,
               ),
             ),
@@ -75,7 +75,11 @@ class SigninDialog extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 3),
-            Text('or', style: TextStyle(color: layout.mainText, fontSize: 15)),
+            Text('or',
+                style: TextStyle(
+                    fontWeight: FontWeight.w300,
+                    color: layout.mainText,
+                    fontSize: 15)),
             const SizedBox(height: 3),
             SizedBox(
               width: 220,

@@ -1,0 +1,19 @@
+body {
+  background-color: #66c0b7;
+  color: #ffffff;
+}
+
+.navbar {
+  background-color: #009688;
+  color: #bce9fb;
+}
+
+.form-check-input:checked {
+  background-color: #009688;
+  border-color: #009688;
+}
+
+.btn {
+  background-color: #009688;
+  border-color: #009688;
+}

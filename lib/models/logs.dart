@@ -101,21 +101,17 @@ class Logs implements Map<String, int> {
   }
 
   void calcNow(DateTime? bgn, DateTime now) {
-    if (bgn == null || bgn.isAfter(now) || now.difference(bgn).inDays > 1) {
-      return;
-    }
-    if (now.day != bgn.day) {
-      final DateKey bgnDateKey = DateKey.fromDateTime(bgn);
-      final DateKey nowDateKey = DateKey.fromDateTime(now);
-      final DateTime baseDate = DateTime(now.year, now.month, now.day);
-      final int bgnDiff = baseDate.difference(bgn).inMilliseconds;
-      final int nowDiff = now.difference(baseDate).inMilliseconds;
-      _data[bgnDateKey.key] = bgnDiff + (_data[bgnDateKey] ?? 0);
-      _data[nowDateKey.key] = nowDiff + (_data[nowDateKey] ?? 0);
+    if (bgn == null || bgn.isAfter(now)) return;
+    if (bgn.year != now.year || bgn.month != now.month || bgn.day != now.day) {
+      final DateKey dateKey = DateKey.fromDateTime(bgn);
+      final DateTime baseDate = DateTime(bgn.year, bgn.month, bgn.day + 1);
+      final int diff = baseDate.difference(bgn).inMilliseconds;
+      _data[dateKey.key] = diff + (_data[dateKey.key] ?? 0);
+      calcNow(baseDate, now);
     } else {
       final DateKey dateKey = DateKey.fromDateTime(now);
       final int diff = now.difference(bgn).inMilliseconds;
-      _data[dateKey.key] = diff + (_data[dateKey] ?? 0);
+      _data[dateKey.key] = diff + (_data[dateKey.key] ?? 0);
     }
   }
 
@@ -133,6 +129,6 @@ class Logs implements Map<String, int> {
   static String formattime(int time) {
     final int hours = time ~/ 3600000;
     final int minutes = (time % 3600000) ~/ 60000;
-    return '$hours 時間 $minutes 分';
+    return '$hours時間 $minutes分';
   }
 }

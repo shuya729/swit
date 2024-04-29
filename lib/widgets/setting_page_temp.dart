@@ -32,67 +32,73 @@ class SettingPageTemp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: layout.mainBack,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    isRoot
-                        ? const SizedBox(width: 48)
-                        : IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(
-                              Icons.arrow_back_ios,
-                              size: 18,
-                              color: layout.mainText,
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          color: layout.mainBack,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      isRoot
+                          ? const SizedBox(width: 48)
+                          : IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: Icon(
+                                Icons.arrow_back_ios,
+                                size: 18,
+                                color: layout.subText,
+                              ),
                             ),
-                          ),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: layout.mainText,
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 18,
+                          color: layout.mainText,
+                        ),
                       ),
-                    ),
-                    fromDialog
-                        ? const SizedBox(width: 48)
-                        : IconButton(
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pop();
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              size: 22,
-                              color: layout.mainText,
+                      fromDialog
+                          ? const SizedBox(width: 48)
+                          : IconButton(
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                size: 22,
+                                color: layout.subText,
+                              ),
                             ),
-                          ),
-                  ],
-                ),
-                Divider(
-                  height: 1,
-                  color: layout.subText,
-                ),
-              ],
+                    ],
+                  ),
+                  Divider(
+                    height: 1,
+                    color: layout.subText,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: child,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: child,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -130,8 +136,8 @@ class SettingDialogTemp extends ConsumerWidget {
               Text(
                 title,
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
                   color: layout.mainText,
                 ),
               ),
@@ -140,6 +146,7 @@ class SettingDialogTemp extends ConsumerWidget {
                   ? Text(
                       description!,
                       style: TextStyle(
+                        fontWeight: FontWeight.w300,
                         fontSize: 14,
                         color: layout.mainText,
                       ),

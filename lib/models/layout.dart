@@ -11,6 +11,7 @@ class Layout {
     required this.subBack,
     required this.subText,
     required this.image,
+    this.error = const Color(0xFFD32F2F),
   });
 
   final Color theme;
@@ -19,12 +20,13 @@ class Layout {
   final Color subBack;
   final Color subText;
   final File? image;
+  final Color error;
 
   static const double _mainBackRate = 0.6;
   static const double _subTextRate = 0.3;
 
   static Layout get def {
-    const Color defTheme = Colors.blue;
+    const Color defTheme = Colors.teal;
     return Layout(
       theme: defTheme,
       mainBack: Color.lerp(Colors.white, defTheme, _mainBackRate)!,

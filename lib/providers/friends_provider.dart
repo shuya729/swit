@@ -40,6 +40,11 @@ class FriendsNotifier extends StateNotifier<List<UserData>> {
       for (DocumentSnapshot doc in snapshot.docs) {
         friends.add(UserData.fromFirestore(doc));
       }
+      friends.sort((a, b) {
+        final DateTime aDate = a.bgndt ?? DateTime(2999);
+        final DateTime bDate = b.bgndt ?? DateTime(2999);
+        return aDate.compareTo(bDate);
+      });
       if (mounted) state = friends;
     }
   }

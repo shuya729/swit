@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -59,6 +58,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = Layout.def;
     return MaterialApp(
+      // debugShowCheckedModeBanner: false, // サンプル用
       theme: ThemeData.dark(),
       home: FutureBuilder(
         future: _futureConfig(),
@@ -67,6 +67,7 @@ class MyApp extends ConsumerWidget {
             final Config config = snapshot.data as Config;
             if (config.isMentenace) {
               return Scaffold(
+                resizeToAvoidBottomInset: true,
                 backgroundColor: layout.mainBack,
                 body: SafeArea(
                   child: Padding(
@@ -108,6 +109,7 @@ class MyApp extends ConsumerWidget {
               );
             } else if (config.isNeedUpdate) {
               return Scaffold(
+                resizeToAvoidBottomInset: true,
                 backgroundColor: layout.mainBack,
                 body: SafeArea(
                   child: Padding(
@@ -161,7 +163,8 @@ class MyApp extends ConsumerWidget {
             return const Main();
           } else {
             return Scaffold(
-              backgroundColor: Layout.def.mainBack,
+              resizeToAvoidBottomInset: true,
+              backgroundColor: layout.mainBack,
             );
           }
         },
@@ -178,7 +181,7 @@ class Main extends ConsumerStatefulWidget {
 }
 
 class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
-  Presence _presence = const Presence(null);
+  final Presence _presence = Presence();
   late final PageController _pageController;
   double _opacity = 1.0;
 
@@ -192,10 +195,6 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
         _opacity = 1 -
             ((_pageController.offset - width) * 2 / width).abs().clamp(0, 1);
       });
-    });
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      _presence = Presence(user);
-      _presence.start();
     });
     WidgetsBinding.instance.addObserver(this);
   }
@@ -222,13 +221,14 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
 
     if (layout == null) {
       return Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: Layout.def.mainBack,
       );
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: layout.mainBack,
-      resizeToAvoidBottomInset: false,
       body: Container(
         decoration: BoxDecoration(
           image: layout.image == null
@@ -294,6 +294,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
 
   Widget _termsPage(Layout layout, bool isPrivacy) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: layout.mainBack,
       body: SafeArea(child: TermsPage(isPrivacy, fromDialog: true)),
     );

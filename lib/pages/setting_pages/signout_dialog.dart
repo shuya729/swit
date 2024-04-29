@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/layout.dart';
+import '../../models/presence.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/loading_dialog.dart';
 
@@ -18,6 +19,8 @@ class SignoutDialog extends ConsumerWidget {
 
   Future<void> _signOut() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
+    final Presence presence = Presence();
+    await presence.paused();
     await auth.signOut();
   }
 
@@ -36,8 +39,8 @@ class SignoutDialog extends ConsumerWidget {
             Text(
               'サインアウト',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
                 color: layout.mainText,
               ),
             ),
@@ -45,6 +48,7 @@ class SignoutDialog extends ConsumerWidget {
             Text(
               'サインアウトしますか？\n一部の機能が使用できなくなります。',
               style: TextStyle(
+                fontWeight: FontWeight.w300,
                 fontSize: 14,
                 color: layout.mainText,
               ),
@@ -57,7 +61,7 @@ class SignoutDialog extends ConsumerWidget {
                 });
               },
               style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
+                foregroundColor: layout.mainText,
                 backgroundColor: layout.subBack,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

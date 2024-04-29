@@ -58,7 +58,7 @@ class RequestedPage extends ConsumerWidget {
             final List<UserData> users = snapshot.data!;
             return ListView.builder(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 10,
+                bottom: MediaQuery.of(context).padding.bottom + 40,
               ),
               itemCount: users.length,
               itemBuilder: (context, index) {
@@ -71,6 +71,7 @@ class RequestedPage extends ConsumerWidget {
               child: Text(
                 '受信したリクエストはありません。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -81,6 +82,7 @@ class RequestedPage extends ConsumerWidget {
               child: Text(
                 'エラーが発生しました。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -92,7 +94,7 @@ class RequestedPage extends ConsumerWidget {
                 width: 30,
                 height: 30,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 1,
                   color: layout.subText,
                   strokeCap: StrokeCap.round,
                 ),

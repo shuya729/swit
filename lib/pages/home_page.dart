@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -11,6 +10,7 @@ import '../models/layout.dart';
 import '../models/user_data.dart';
 import '../providers/friends_provider.dart';
 import '../providers/layout_providers.dart';
+import '../widgets/icon_widget.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -77,18 +77,20 @@ class _ClockWidgetState extends ConsumerState<ClockWidget> {
         children: [
           Text(
             '${_now.year}/${_now.month.toString().padLeft(2, '0')}/${_now.day.toString().padLeft(2, '0')}',
+            // '2024/04/01', // サンプル用のコード
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 28,
+              fontWeight: FontWeight.w300,
+              fontSize: 24,
               letterSpacing: 2,
               color: layout.mainText,
             ),
           ),
           Text(
             '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
+            // '12:34', // サンプル用のコード
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 85,
+              fontWeight: FontWeight.w100,
+              fontSize: 75,
               letterSpacing: 2,
               height: 1.0,
               color: layout.mainText,
@@ -125,15 +127,9 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
     super.dispose();
   }
 
-  // 本番環境用の広告ユニットID
   final String _adUnitId = Platform.isAndroid
       ? 'ca-app-pub-9057495563597980/5634855423'
       : 'ca-app-pub-9057495563597980/1328778904';
-
-  // テスト用の広告ユニットID
-  // final String _adUnitId = Platform.isAndroid
-  //     ? 'ca-app-pub-3940256099942544/2247696110'
-  //     : 'ca-app-pub-3940256099942544/3986624511';
 
   NativeTemplateStyle _nativeTemplateStyle(Layout layout) {
     return NativeTemplateStyle(
@@ -177,6 +173,14 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   @override
   Widget build(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+
+    // // サンプル用のコード
+    // return Container(
+    //   height: 105,
+    //   width: 320,
+    //   margin: const EdgeInsets.symmetric(horizontal: 10),
+    // );
+
     return Container(
       height: 105,
       width: 320,
@@ -185,7 +189,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       padding: const EdgeInsets.only(left: 15, top: 0, right: 7, bottom: 0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         border: layout.image != null
             ? null
             : Border.all(width: 0, color: layout.mainText),
@@ -209,14 +213,14 @@ class FriendsWidget extends ConsumerWidget {
         friends.where((friend) => friend.bgndt != null).toList();
 
     if (activeFriends.isEmpty) {
-      return const SizedBox(height: 56);
+      return const SizedBox(height: 48);
     }
 
     return Container(
-      height: 56,
+      height: 48,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         border: layout.image != null
             ? null
             : Border.all(width: 0, color: layout.mainText),
@@ -227,19 +231,13 @@ class FriendsWidget extends ConsumerWidget {
           shrinkWrap: true,
           itemCount: activeFriends.length,
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           itemBuilder: (context, index) {
             final UserData friend = activeFriends[index];
             return Padding(
-              padding: const EdgeInsets.all(4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: CachedNetworkImageProvider(friend.image),
-                  ),
-                ],
+              padding: const EdgeInsets.all(3),
+              child: Center(
+                child: IconWidget(friend.image, radius: 19.4),
               ),
             );
           },

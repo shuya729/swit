@@ -1,5 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider,
+} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app-check.js";
+import {
   getFirestore,
   collection,
   addDoc,
@@ -18,6 +22,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaEnterpriseProvider(
+    "6Ld1mr4pAAAAAMkxE5S1Coz1ERACYOX5ZChyeFMn"
+  ),
+  isTokenAutoRefreshEnabled: true,
+});
+
 const db = getFirestore(app);
 
 export async function addContacts(name, email, subject, content) {

@@ -51,10 +51,10 @@ class LayoutPage extends ConsumerWidget {
           scale: scale,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(15),
               border: Border.all(
-                color: layout.mainText,
-                width: 5,
+                color: layout.subText,
+                width: 1,
               ),
               image: layout.image == null
                   ? null
@@ -94,10 +94,10 @@ class LayoutPage extends ConsumerWidget {
                             height: 26,
                             decoration: BoxDecoration(
                               color: color,
-                              borderRadius: BorderRadius.circular(13),
+                              borderRadius: BorderRadius.circular(9),
                               border: Border.all(
-                                width: 1.5,
-                                color: layout.theme == color
+                                width: 1,
+                                color: layout.theme.value == color.value
                                     ? layout.mainText
                                     : layout.subText,
                               ),
@@ -119,9 +119,9 @@ class LayoutPage extends ConsumerWidget {
                               );
                             },
                             icon: Icon(
-                              Icons.add_photo_alternate,
+                              Icons.add_photo_alternate_outlined,
                               size: 25,
-                              color: layout.mainText,
+                              color: layout.subText,
                             ),
                           ),
                         );
@@ -152,11 +152,16 @@ class BackImageSheet extends ConsumerWidget {
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedImage == null) return;
     final croppedImage = await ImageCropper().cropImage(
-      sourcePath: pickedImage.path,
-      aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 50,
-    );
+        sourcePath: pickedImage.path,
+        aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 100,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: '画像を編集',
+            hideBottomControls: true,
+          ),
+        ]);
     if (croppedImage == null) return;
     await notifier.changeImage(File(croppedImage.path));
   }
@@ -185,9 +190,9 @@ class BackImageSheet extends ConsumerWidget {
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 18,
                       color: layout.subBack,
-                      fontWeight: FontWeight.normal,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -213,9 +218,9 @@ class BackImageSheet extends ConsumerWidget {
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 18,
                       color: layout.subBack,
-                      fontWeight: FontWeight.normal,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -235,14 +240,14 @@ class BackImageSheet extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   color: layout.mainText.withOpacity(0.8),
                   alignment: Alignment.center,
-                  child: const Text(
+                  child: Text(
                     '画像を削除',
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 18,
-                      color: Colors.red,
-                      fontWeight: FontWeight.normal,
+                      color: layout.error,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -265,9 +270,9 @@ class BackImageSheet extends ConsumerWidget {
           child: Text(
             'キャンセル',
             style: TextStyle(
+              fontWeight: FontWeight.w300,
               fontSize: 18,
               color: layout.subBack,
-              fontWeight: FontWeight.normal,
               decoration: TextDecoration.none,
             ),
           ),

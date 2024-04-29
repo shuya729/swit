@@ -54,7 +54,7 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
             width: 30,
             height: 30,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
+              strokeWidth: 1,
               color: layout.subText,
               strokeCap: StrokeCap.round,
             ),
@@ -66,6 +66,9 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
     return SettingPageTemp(
       title: 'ライセンス情報',
       child: ListView.builder(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         itemCount: packages.length,
         itemBuilder: (context, index) {
           final String package = packages.keys.toList()[index];
@@ -96,8 +99,9 @@ class LicenseChild extends ConsumerWidget {
       title: package,
       child: ListView.separated(
         itemCount: paragraphs.length,
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 10),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         separatorBuilder: (context, index) {
           return Divider(height: 60, color: layout.subText);
         },
@@ -116,9 +120,9 @@ class LicenseChild extends ConsumerWidget {
                   child: Text(
                     p.text,
                     style: TextStyle(
+                      fontWeight: FontWeight.w300,
                       fontSize: 14,
                       color: layout.mainText,
-                      // height: 1.2,
                     ),
                   ));
             }).toList(),

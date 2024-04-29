@@ -61,7 +61,7 @@ class FriendsPage extends ConsumerWidget {
             final List<UserData> users = snapshot.data!;
             return ListView.builder(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 10,
+                bottom: MediaQuery.of(context).padding.bottom + 40,
               ),
               itemCount: users.length,
               itemBuilder: (context, index) {
@@ -74,6 +74,7 @@ class FriendsPage extends ConsumerWidget {
               child: Text(
                 'フレンドがいません。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -84,6 +85,7 @@ class FriendsPage extends ConsumerWidget {
               child: Text(
                 'エラーが発生しました。',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 15,
                 ),
@@ -95,7 +97,7 @@ class FriendsPage extends ConsumerWidget {
                 width: 30,
                 height: 30,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
+                  strokeWidth: 1,
                   color: layout.subText,
                   strokeCap: StrokeCap.round,
                 ),

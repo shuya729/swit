@@ -47,10 +47,10 @@ class UserTile extends ConsumerWidget {
                   '${user.name} を報告',
                   softWrap: false,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
+                    fontWeight: FontWeight.w300,
                     fontSize: 18,
-                    color: Colors.red,
-                    fontWeight: FontWeight.normal,
+                    color: layout.error,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -73,9 +73,9 @@ class UserTile extends ConsumerWidget {
               child: Text(
                 'キャンセル',
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   fontSize: 18,
                   color: layout.subBack,
-                  fontWeight: FontWeight.normal,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -117,7 +117,7 @@ class UserTile extends ConsumerWidget {
           width: 15,
           height: 15,
           child: CircularProgressIndicator(
-            strokeWidth: 1.5,
+            strokeWidth: 1,
             color: layout.subText,
             strokeCap: StrokeCap.round,
           ),
@@ -158,7 +158,7 @@ class UserTile extends ConsumerWidget {
           style: ElevatedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            foregroundColor: layout.subText,
+            foregroundColor: layout.mainText,
             backgroundColor: layout.subBack,
             side: BorderSide(color: layout.subBack),
             shape: RoundedRectangleBorder(
@@ -202,7 +202,7 @@ class UserTile extends ConsumerWidget {
       style: ElevatedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        foregroundColor: layout.subText,
+        foregroundColor: layout.mainText,
         backgroundColor: layout.subBack,
         side: BorderSide(color: layout.subBack),
         shape: RoundedRectangleBorder(
@@ -254,6 +254,7 @@ class UserTile extends ConsumerWidget {
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
+                  fontWeight: FontWeight.w300,
                   color: layout.mainText,
                   fontSize: 16,
                 ),
