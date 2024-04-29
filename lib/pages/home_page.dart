@@ -77,6 +77,7 @@ class _ClockWidgetState extends ConsumerState<ClockWidget> {
         children: [
           Text(
             '${_now.year}/${_now.month.toString().padLeft(2, '0')}/${_now.day.toString().padLeft(2, '0')}',
+            // '2024/04/01', // サンプル用のコード
             style: TextStyle(
               fontWeight: FontWeight.w300,
               fontSize: 24,
@@ -86,6 +87,7 @@ class _ClockWidgetState extends ConsumerState<ClockWidget> {
           ),
           Text(
             '${_now.hour.toString().padLeft(2, '0')}:${_now.minute.toString().padLeft(2, '0')}',
+            // '12:34', // サンプル用のコード
             style: TextStyle(
               fontWeight: FontWeight.w100,
               fontSize: 75,
@@ -172,7 +174,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   Widget build(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
 
-    // サンプル用のコード
+    // // サンプル用のコード
     // return Container(
     //   height: 105,
     //   width: 320,

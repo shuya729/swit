@@ -238,9 +238,10 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                             child: Text(
                               'ご意見',
                               style: TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 15,
-                                  color: layout.mainText),
+                                fontWeight: FontWeight.w300,
+                                fontSize: 15,
+                                color: layout.mainText,
+                              ),
                             ),
                           )
                         ],
@@ -412,7 +413,7 @@ class _ContactPageState extends ConsumerState<ContactPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: layout.subText,
+                      foregroundColor: layout.mainText,
                       backgroundColor: layout.subBack,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

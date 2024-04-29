@@ -93,19 +93,13 @@ class DeleteDialog extends ConsumerWidget {
                 });
               },
               style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
+                foregroundColor: layout.error,
                 backgroundColor: layout.subBack,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                '削除する',
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  color: layout.error,
-                ),
-              ),
+              child: const Text('削除する'),
             ),
           ],
         ),

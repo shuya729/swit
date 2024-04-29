@@ -97,7 +97,7 @@ class LayoutPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(9),
                               border: Border.all(
                                 width: 1,
-                                color: layout.theme == color
+                                color: layout.theme.value == color.value
                                     ? layout.mainText
                                     : layout.subText,
                               ),

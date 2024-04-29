@@ -158,7 +158,7 @@ class UserTile extends ConsumerWidget {
           style: ElevatedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            foregroundColor: layout.subText,
+            foregroundColor: layout.mainText,
             backgroundColor: layout.subBack,
             side: BorderSide(color: layout.subBack),
             shape: RoundedRectangleBorder(
@@ -202,7 +202,7 @@ class UserTile extends ConsumerWidget {
       style: ElevatedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        foregroundColor: layout.subText,
+        foregroundColor: layout.mainText,
         backgroundColor: layout.subBack,
         side: BorderSide(color: layout.subBack),
         shape: RoundedRectangleBorder(

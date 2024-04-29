@@ -99,8 +99,9 @@ class LicenseChild extends ConsumerWidget {
       title: package,
       child: ListView.separated(
         itemCount: paragraphs.length,
-        padding:
-            EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 10),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 40,
+        ),
         separatorBuilder: (context, index) {
           return Divider(height: 60, color: layout.subText);
         },

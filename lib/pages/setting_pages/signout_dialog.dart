@@ -61,7 +61,7 @@ class SignoutDialog extends ConsumerWidget {
                 });
               },
               style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
+                foregroundColor: layout.mainText,
                 backgroundColor: layout.subBack,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

@@ -58,6 +58,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = Layout.def;
     return MaterialApp(
+      // debugShowCheckedModeBanner: false, // サンプル用
       theme: ThemeData.dark(),
       home: FutureBuilder(
         future: _futureConfig(),

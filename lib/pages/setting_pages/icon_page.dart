@@ -114,7 +114,7 @@ class _IconPageState extends ConsumerState<IconPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                foregroundColor: layout.subText,
+                foregroundColor: layout.mainText,
                 backgroundColor: layout.subBack,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

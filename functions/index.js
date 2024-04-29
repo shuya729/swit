@@ -216,12 +216,15 @@ exports.logFunction = onValueDeleted("/users/{uid}/{conId}", async (event) => {
         bgn.getDate() + 1
       );
       const diff = baseDate.getTime() - bgn.getTime();
+      const nextLogs = calcLogs(baseDate, now);
+      const monthLogs = nextLogs[monthKey] ? nextLogs[monthKey] : {};
       return {
+        ...nextLogs,
         [monthKey]: {
           monthKey: monthKey,
+          ...monthLogs,
           [dateKey]: FieldValue.increment(diff),
         },
-        ...calcLogs(baseDate, now),
       };
     } else {
       const monthKey = getMonthKey(bgn);

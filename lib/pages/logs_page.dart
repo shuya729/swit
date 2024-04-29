@@ -247,6 +247,7 @@ class LogWidget extends ConsumerWidget {
     required this.bodyHeight,
   }) {
     now = DateTime.now();
+    // now = DateTime(2024, 4, 1); // サンプル用のコード
     logsFuture = _loadLogs(user, now);
   }
   final bool opened;
@@ -287,7 +288,7 @@ class LogWidget extends ConsumerWidget {
       return const SizedBox(height: 22, width: 22);
     }
 
-    // サンプル用のコード
+    // // サンプル用のコード
     // final double percent = Random().nextDouble();
 
     final int time = logs.gettime(DateKey.fromDateTime(date));
@@ -436,6 +437,7 @@ class LogWidget extends ConsumerWidget {
                         child: Text(
                           Logs.formattime(
                               logs.gettime(DateKey.fromDateTime(now))),
+                          // Logs.formattime(12000000), // サンプル用のコード
                           style: TextStyle(
                             fontWeight: FontWeight.w300,
                             fontSize: 17,
@@ -459,6 +461,7 @@ class LogWidget extends ConsumerWidget {
                         alignment: Alignment.topCenter,
                         child: Text(
                           Logs.formattime(logs.getMonthtime(now)),
+                          // Logs.formattime(12000000), // サンプル用のコード
                           style: TextStyle(
                             fontWeight: FontWeight.w300,
                             fontSize: 17,
