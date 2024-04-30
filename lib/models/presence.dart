@@ -43,7 +43,7 @@ class Presence {
   Future<void> resumed() async {
     if (_user == null) return;
     await database.goOnline();
-    _timer = Timer.periodic(const Duration(hours: 1), (_) {
+    _timer = Timer.periodic(const Duration(minutes: 50), (_) {
       if (_user == null || _postKey.isEmpty) return;
       final DateTime now = DateTime.now();
       final DatabaseReference myRef = database.ref('users/${_user!.uid}');

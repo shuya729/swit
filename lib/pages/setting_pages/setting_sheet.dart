@@ -178,17 +178,17 @@ class SettingSheet extends ConsumerWidget {
           onTap: () => SettingPageTemp.push(context, FriendsPage(myData)),
         ),
         settingItem(
-          menu: 'ユーザー検索',
+          menu: 'フレンド追加',
           layout: layout,
           onTap: () => SettingPageTemp.push(context, SearchPage(myData)),
         ),
         settingItem(
-          menu: '送信済みリクエスト',
+          menu: '送信リクエスト',
           layout: layout,
           onTap: () => SettingPageTemp.push(context, RequestingPage(myData)),
         ),
         settingItem(
-          menu: '受信済みリクエスト',
+          menu: '受信リクエスト',
           layout: layout,
           onTap: () => SettingPageTemp.push(context, RequestedPage(myData)),
         ),

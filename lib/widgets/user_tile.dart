@@ -9,7 +9,7 @@ import '../models/request.dart';
 import '../models/user_data.dart';
 import '../providers/friend_states.dart';
 import '../providers/layout_providers.dart';
-import '../providers/requesting_proivider.dart';
+import '../providers/requests_proivider.dart';
 import 'icon_widget.dart';
 import 'loading_dialog.dart';
 
@@ -97,13 +97,15 @@ class UserTile extends ConsumerWidget {
 
   Widget _userButton(
     Map<String, String> friendStates,
-    List<String> requesting,
+    List<Request> requests,
     Layout layout,
     BuildContext context,
   ) {
-    if (requesting.contains(user.uid)) {
+    final List<Request> tgt =
+        requests.where((Request r) => r.tgt == user.uid).toList();
+    if (tgt.isNotEmpty) {
       return OutlinedButton(
-        onPressed: null,
+        onPressed: () => LoadingDialog(_cancel(tgt)).show(context),
         style: OutlinedButton.styleFrom(
           visualDensity: VisualDensity.compact,
           padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -229,11 +231,18 @@ class UserTile extends ConsumerWidget {
     await Request.unblockRequest(myData.uid, user.uid).toFirestore();
   }
 
+  Future<void> _cancel(List<Request> tgt) async {
+    if (tgt.isEmpty) return;
+    for (Request r in tgt) {
+      await r.cancel();
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final Map<String, String> friendStates = ref.watch(friendStatesProvider);
-    final List<String> requesting = ref.watch(requestingProvider);
+    final List<Request> requests = ref.watch(requestsProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       width: double.infinity,
@@ -263,7 +272,7 @@ class UserTile extends ConsumerWidget {
             const SizedBox(width: 15),
             SizedBox(
               width: 130,
-              child: _userButton(friendStates, requesting, layout, context),
+              child: _userButton(friendStates, requests, layout, context),
             ),
           ],
         ),

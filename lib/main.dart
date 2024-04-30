@@ -305,7 +305,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
       backgroundColor: layout.mainBack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Container(
-        width: 320,
+        width: 330,
         constraints: const BoxConstraints(maxHeight: 320),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
         child: Column(
@@ -449,13 +449,13 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
   Widget build(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     if (widget.config.isFirst) {
-      return _dialog('利用規約とプライバシーポリシーに\n同意してください。', layout);
+      return _dialog('利用規約とプライバシーポリシーに\n同意が必要です。', layout);
     } else if (widget.config.isTermUpdated && widget.config.isPrivacyUpdated) {
-      return _dialog('利用規約とプライバシーポリシーが\n更新されました。同意してください。', layout);
+      return _dialog('利用規約とプライバシーポリシーが更新\nされました。ご利用には同意が必要です。', layout);
     } else if (widget.config.isTermUpdated) {
-      return _dialog('利用規約が更新されました。\n同意してください。', layout);
+      return _dialog('利用規約が更新されました。\nご利用には同意が必要です。', layout);
     } else {
-      return _dialog('プライバシーポリシーが更新され\nました。同意してください。', layout);
+      return _dialog('プライバシーポリシーが更新されました。\nご利用には同意が必要です。', layout);
     }
   }
 }

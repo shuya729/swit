@@ -40,7 +40,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     return SettingPageTemp(
-      title: 'ユーザー検索',
+      title: 'フレンド追加',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap:

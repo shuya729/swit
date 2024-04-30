@@ -50,7 +50,7 @@ class RequestedPage extends ConsumerWidget {
     final Map<String, String> friendStates = ref.watch(friendStatesProvider);
 
     return SettingPageTemp(
-      title: '受信済みリクエスト',
+      title: '受信リクエスト',
       child: FutureBuilder(
         future: _getRequestedUsers(friendStates),
         builder: (context, snapshot) {

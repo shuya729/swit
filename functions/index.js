@@ -96,45 +96,40 @@ exports.requestFunction = onDocumentCreated(
     const myFriendRef = firestore.collection("friends").doc(uid);
     const tgtFriendRef = firestore.collection("friends").doc(tgt);
 
-    firestore
-      .runTransaction(async (t) => {
-        const sourceDoc = await t.get(sourceRef);
-        if (!sourceDoc.exists) return;
-        const tgtFriendDoc = await t.get(tgtFriendRef);
+    await firestore.runTransaction(async (t) => {
+      const tgtFriendDoc = await t.get(tgtFriendRef);
+      const sourceDoc = await t.get(sourceRef);
+      if (!sourceDoc.exists) return;
 
-        if (request === "friend") {
-          if (
-            tgtFriendDoc.exists &&
-            tgtFriendDoc.data()[uid] === "requesting"
-          ) {
-            t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
-          }
-        } else if (request === "unfriend") {
-          t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
-          t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
-        } else if (request === "block") {
-          if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-            t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          }
-        } else if (request === "unblock") {
-          if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-            t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          }
+      if (request === "friend") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "requesting") {
+          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
         }
-      })
-      .then(() => {
-        sourceRef.delete();
-      });
+      } else if (request === "unfriend") {
+        t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
+        t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
+      } else if (request === "block") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
+          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+        }
+      } else if (request === "unblock") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
+          t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+        }
+      }
+    });
+
+    await sourceRef.delete();
   }
 );
 
@@ -143,6 +138,7 @@ exports.presenceFunction = onValueCreated(
   async (event) => {
     const uid = event.params.uid;
     const now = new Date();
+    const baseTime = 60 * 60 * 1000;
     const userRef = firestore.collection("users").doc(uid);
     const userDoc = await userRef.get();
     if (!userDoc.exists) return;
@@ -153,7 +149,7 @@ exports.presenceFunction = onValueCreated(
     }
     const snapshot = await event.data.ref.parent
       .orderByValue()
-      .startAt(now.getTime() - 4000000)
+      .startAt(now.getTime() - baseTime)
       .get();
     if (!snapshot.exists() || snapshot.numChildren() > 1) return;
     userRef.update({ bgndt: now, upddt: now });
@@ -162,11 +158,14 @@ exports.presenceFunction = onValueCreated(
 
 exports.logFunction = onValueDeleted("/users/{uid}/{conId}", async (event) => {
   const uid = event.params.uid;
+  const data = event.data.val();
   const now = new Date();
+  const baseTime = 60 * 60 * 1000;
+  if (now.getTime() - data > baseTime) return;
   const userRef = firestore.collection("users").doc(uid);
   const snapshot = await event.data.ref.parent
     .orderByValue()
-    .startAt(now.getTime() - 4000000)
+    .startAt(now.getTime() - baseTime)
     .get();
   if (snapshot.exists()) return;
   const userDoc = await userRef.get();
