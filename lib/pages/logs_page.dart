@@ -68,6 +68,7 @@ class _LogsPageState extends ConsumerState<LogsPage> {
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 40),
           controller: _scrollController,
           children: [
             SizedBox(
@@ -153,8 +154,9 @@ class LogsWidget extends ConsumerWidget {
 
     if (user == null) {
       return SizedBox(
-        height: bodyHeight,
-        child: Center(
+        height: bodyHeight / 2,
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: Text(
             'サインインが必要です。',
             style: TextStyle(
@@ -167,8 +169,9 @@ class LogsWidget extends ConsumerWidget {
       );
     } else if (myData == null) {
       return SizedBox(
-        height: bodyHeight,
-        child: Center(
+        height: bodyHeight / 2,
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: SizedBox(
             width: 40,
             height: 40,
@@ -181,8 +184,7 @@ class LogsWidget extends ConsumerWidget {
         ),
       );
     } else {
-      return ExpansionPanelList.radio(
-        initialOpenPanelValue: 0,
+      return ExpansionPanelList(
         elevation: 0,
         materialGapSize: 0,
         dividerColor: Colors.transparent,
@@ -193,14 +195,14 @@ class LogsWidget extends ConsumerWidget {
           friends.length + 1,
           (index) {
             final UserData user = index == 0 ? myData : friends[index - 1];
-            return ExpansionPanelRadio(
-              value: index,
-              canTapOnHeader: true,
+            return ExpansionPanel(
+              isExpanded: expandIndex == index,
               backgroundColor: Colors.transparent,
               headerBuilder: (context, isExpanded) {
                 return SizedBox(
                   height: 50,
                   child: ListTile(
+                    onTap: () => callBack(index, !isExpanded),
                     leading: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(19),

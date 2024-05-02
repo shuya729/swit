@@ -23,11 +23,19 @@ class Request {
     });
   }
 
+  factory Request.fromFirestore(DocumentSnapshot doc) {
+    final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Request(
+      uid: data['uid'],
+      tgt: data['tgt'],
+      request: data['request'],
+    );
+  }
+
   static String get friend => 'friend';
   static String get unfriend => 'unfriend';
   static String get block => 'block';
   static String get unblock => 'unblock';
-  // static String get remove => 'remove';
 
   factory Request.friendRequest(String uid, String tgt) {
     return Request(uid: uid, tgt: tgt, request: friend);
@@ -44,8 +52,4 @@ class Request {
   factory Request.unblockRequest(String uid, String tgt) {
     return Request(uid: uid, tgt: tgt, request: unblock);
   }
-
-  // factory Request.removeRequest(String uid, String tgt) {
-  //   return Request(uid: uid, tgt: tgt, request: remove);
-  // }
 }

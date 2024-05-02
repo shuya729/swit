@@ -2,16 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/request.dart';
 import 'auth_provider.dart';
 
-final requestingProvider =
-    StateNotifierProvider<RequestingNotifier, List<String>>((ref) {
+final requestsProvider =
+    StateNotifierProvider<RequestsNotifier, List<Request>>((ref) {
   final User? auth = ref.watch(authProvider);
-  return RequestingNotifier(auth);
+  return RequestsNotifier(auth);
 });
 
-class RequestingNotifier extends StateNotifier<List<String>> {
-  RequestingNotifier(this._user) : super([]) {
+class RequestsNotifier extends StateNotifier<List<Request>> {
+  RequestsNotifier(this._user) : super([]) {
     _init();
   }
   final User? _user;
@@ -24,13 +25,11 @@ class RequestingNotifier extends StateNotifier<List<String>> {
         .where("uid", isEqualTo: _user.uid)
         .snapshots();
     await for (QuerySnapshot snapshot in stream) {
-      final List<String> requesting = [];
+      final List<Request> requests = [];
       for (DocumentSnapshot doc in snapshot.docs) {
-        final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        final String tgt = data['tgt'] as String;
-        requesting.add(tgt);
+        requests.add(Request.fromFirestore(doc));
       }
-      if (mounted) state = requesting;
+      if (mounted) state = requests;
     }
   }
 }

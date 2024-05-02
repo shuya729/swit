@@ -15,6 +15,14 @@ class Presence {
   static final FirebaseAuth auth = FirebaseAuth.instance;
   static final FirebaseDatabase database = FirebaseDatabase.instance;
 
+  Map<String, Object> data(String uid, int time) {
+    return {
+      "uid": uid,
+      "time": time,
+    };
+  }
+
+  static final DatabaseReference presenceRef = database.ref('presence');
   static final DatabaseReference connectedRef = database.ref('.info/connected');
   Presence._internal() {
     auth.authStateChanges().listen((user) async {
@@ -25,15 +33,14 @@ class Presence {
       } else {
         _user = user;
         await resumed();
-        final DatabaseReference myRef = database.ref('users/${user.uid}');
         connectedRef.onValue.listen((event) {
           final bool connected = event.snapshot.value as bool? ?? false;
           if (connected) {
             final DateTime now = DateTime.now();
-            final DatabaseReference con = myRef.push();
-            con.onDisconnect().remove();
-            con.set(now.millisecondsSinceEpoch);
-            _postKey = con.key ?? '';
+            final DatabaseReference preRef = presenceRef.push();
+            preRef.onDisconnect().remove();
+            preRef.set(data(user.uid, now.millisecondsSinceEpoch));
+            _postKey = preRef.key ?? '';
           }
         });
       }
@@ -43,11 +50,11 @@ class Presence {
   Future<void> resumed() async {
     if (_user == null) return;
     await database.goOnline();
-    _timer = Timer.periodic(const Duration(hours: 1), (_) {
+    _timer = Timer.periodic(const Duration(minutes: 50), (_) {
       if (_user == null || _postKey.isEmpty) return;
       final DateTime now = DateTime.now();
-      final DatabaseReference myRef = database.ref('users/${_user!.uid}');
-      myRef.update({_postKey: now.millisecondsSinceEpoch});
+      final DatabaseReference preRef = presenceRef.child(_postKey);
+      preRef.update(data(_user!.uid, now.millisecondsSinceEpoch));
     });
   }
 

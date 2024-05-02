@@ -1,4 +1,6 @@
+const https = require("https");
 const { initializeApp } = require("firebase-admin/app");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
 const { getDatabase } = require("firebase-admin/database");
@@ -77,165 +79,261 @@ exports.deleteFunction = user().onDelete(async (user) => {
   if (iconImage.exists()) {
     await storage.bucket().file(`users/${user.uid}/iconImage.jpg`).delete();
   }
-
-  const databaseRef = database.ref(`users/${user.uid}`);
-  await databaseRef.remove();
 });
 
 exports.requestFunction = onDocumentCreated(
   "requests/{requestId}",
   async (event) => {
     const data = event.data.data();
-    const requestId = event.params.requestId;
 
     const uid = data.uid;
     const tgt = data.tgt;
     const request = data.request;
 
-    const sourceRef = firestore.collection("requests").doc(requestId);
+    const sourceRef = event.data.ref;
     const myFriendRef = firestore.collection("friends").doc(uid);
     const tgtFriendRef = firestore.collection("friends").doc(tgt);
 
-    firestore
-      .runTransaction(async (t) => {
-        const sourceDoc = await t.get(sourceRef);
-        if (!sourceDoc.exists) return;
-        const tgtFriendDoc = await t.get(tgtFriendRef);
+    await firestore.runTransaction(async (t) => {
+      const sourceDoc = await t.get(sourceRef);
+      if (!sourceDoc.exists) return;
+      const tgtFriendDoc = await t.get(tgtFriendRef);
 
-        if (request === "friend") {
-          if (
-            tgtFriendDoc.exists &&
-            tgtFriendDoc.data()[uid] === "requesting"
-          ) {
-            t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
-          }
-        } else if (request === "unfriend") {
-          t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
-          t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
-        } else if (request === "block") {
-          if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-            t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          }
-        } else if (request === "unblock") {
-          if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-            t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
-          } else {
-            t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-            t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          }
+      if (request === "friend") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "requesting") {
+          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
         }
-      })
-      .then(() => {
-        sourceRef.delete();
-      });
+      } else if (request === "unfriend") {
+        t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
+        t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
+      } else if (request === "block") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
+          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+        }
+      } else if (request === "unblock") {
+        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
+          t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
+        } else {
+          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
+          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+        }
+      }
+    });
+
+    await sourceRef.delete();
   }
 );
 
 exports.presenceFunction = onValueCreated(
-  "/users/{uid}/{conId}",
+  "/presence/{presenceId}",
   async (event) => {
-    const uid = event.params.uid;
+    const presenceId = event.params.presenceId;
+    const uid = event.data.val().uid;
     const now = new Date();
+    const baseTime = 60 * 60 * 1000;
     const userRef = firestore.collection("users").doc(uid);
     const userDoc = await userRef.get();
     if (!userDoc.exists) return;
     const bgndt = userDoc.data().bgndt;
-    if (bgndt === null) {
-      userRef.update({ bgndt: now, upddt: now });
-      return;
+    if (bgndt !== null) {
+      const snapshot = await event.data.ref.parent
+        .orderByChild("uid")
+        .equalTo(uid)
+        .get();
+
+      if (!snapshot.exists()) return;
+      let count = 0;
+      snapshot.forEach((child) => {
+        if (
+          child.key !== presenceId &&
+          child.val().time > now.getTime() - baseTime
+        ) {
+          count++;
+        }
+      });
+      if (count > 0) return;
     }
-    const snapshot = await event.data.ref.parent
-      .orderByValue()
-      .startAt(now.getTime() - 4000000)
-      .get();
-    if (!snapshot.exists() || snapshot.numChildren() > 1) return;
     userRef.update({ bgndt: now, upddt: now });
   }
 );
 
-exports.logFunction = onValueDeleted("/users/{uid}/{conId}", async (event) => {
-  const uid = event.params.uid;
-  const now = new Date();
-  const userRef = firestore.collection("users").doc(uid);
-  const snapshot = await event.data.ref.parent
-    .orderByValue()
-    .startAt(now.getTime() - 4000000)
-    .get();
-  if (snapshot.exists()) return;
-  const userDoc = await userRef.get();
-  if (!userDoc.exists) return;
-  const bgndt = userDoc.data().bgndt;
-  if (bgndt === null) return;
-  userRef.update({ bgndt: null, upddt: now });
+exports.logFunction = onValueDeleted(
+  "/presence/{presenceId}",
+  async (event) => {
+    const uid = event.data.val().uid;
+    const time = event.data.val().time;
+    const now = new Date();
+    const baseTime = 60 * 60 * 1000;
+    const userRef = firestore.collection("users").doc(uid);
 
-  const bgn = bgndt.toDate();
-  const logs = calcLogs(bgn, now);
+    const snapshot = await event.data.ref.parent
+      .orderByChild("uid")
+      .equalTo(uid)
+      .get();
+    let count = 0;
+    if (snapshot.exists()) {
+      snapshot.forEach((child) => {
+        if (child.val().time > now.getTime() - baseTime) count++;
+      });
+    }
+    if (count > 0) return;
+    const userDoc = await userRef.get();
+    if (!userDoc.exists) return;
+    const bgndt = userDoc.data().bgndt;
+    if (bgndt === null) return;
+    userRef.update({ bgndt: null, upddt: now });
+
+    if (time < now.getTime() - baseTime) return;
+    const bgn = bgndt.toDate();
+    const logs = calcLogs(bgn, now);
+    const batch = firestore.batch();
+
+    Object.keys(logs).forEach((key) => {
+      const logRef = firestore
+        .collection("users")
+        .doc(uid)
+        .collection("logs")
+        .doc(key);
+      batch.set(logRef, logs[key], { merge: true });
+    });
+    await batch.commit();
+  }
+);
+
+exports.presenceCroller = onSchedule("0 * * * *", async (event) => {
+  const now = new Date();
+  const baseTime = 60 * 60 * 1000;
+  const query = database
+    .ref("presence")
+    .orderByChild("time")
+    .endAt(now - baseTime)
+    .limitToFirst(100);
+  const snapshot = await query.get();
+
+  if (!snapshot.exists()) return;
+
+  console.log("delete presence num: ", snapshot.numChildren());
+
+  let newData = {};
+  snapshot.forEach((child) => {
+    newData[child.key] = null;
+  });
+
+  database.ref("presence").update(newData);
+});
+
+exports.requestCroller = onSchedule("30 * * * *", async (event) => {
+  const now = new Date();
+  const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
+  const query = firestore
+    .collection("requests")
+    .where("credt", "<", baseDate)
+    .limit(100);
+  const snapshot = await query.get();
+
+  if (snapshot.empty) return;
+
+  console.log("delete requests num: ", snapshot.size);
+
   const batch = firestore.batch();
-  Object.keys(logs).forEach((key) => {
-    const logRef = firestore
-      .collection("users")
-      .doc(uid)
-      .collection("logs")
-      .doc(key);
-    batch.set(logRef, logs[key], { merge: true });
+  snapshot.forEach((doc) => {
+    batch.delete(doc.ref);
   });
   await batch.commit();
-
-  function getMonthKey(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    return `${year}-${month}`;
-  }
-
-  function getDateKey(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-
-  function calcLogs(bgn, now) {
-    if (bgn.getTime() > now.getTime()) return {};
-    if (
-      bgn.getFullYear() !== now.getFullYear() ||
-      bgn.getMonth() !== now.getMonth() ||
-      bgn.getDate() !== now.getDate()
-    ) {
-      const monthKey = getMonthKey(bgn);
-      const dateKey = getDateKey(bgn);
-      const baseDate = new Date(
-        bgn.getFullYear(),
-        bgn.getMonth(),
-        bgn.getDate() + 1
-      );
-      const diff = baseDate.getTime() - bgn.getTime();
-      const nextLogs = calcLogs(baseDate, now);
-      const monthLogs = nextLogs[monthKey] ? nextLogs[monthKey] : {};
-      return {
-        ...nextLogs,
-        [monthKey]: {
-          monthKey: monthKey,
-          ...monthLogs,
-          [dateKey]: FieldValue.increment(diff),
-        },
-      };
-    } else {
-      const monthKey = getMonthKey(bgn);
-      const dateKey = getDateKey(bgn);
-      const diff = now.getTime() - bgn.getTime();
-      return {
-        [monthKey]: {
-          monthKey: monthKey,
-          [dateKey]: FieldValue.increment(diff),
-        },
-      };
-    }
-  }
 });
+
+exports.contactFunction = onDocumentCreated(
+  "contacts/{contactId}",
+  async (event) => {
+    const data = event.data.data();
+
+    const id = event.params.contactId;
+    const uid = data.uid ? data.uid : "";
+    const name = data.name ? data.name : "";
+    const email = data.email ? data.email : "";
+    const subject = data.subject ? data.subject : 0;
+    const content = data.content ? data.content : "";
+
+    const subjectList = [
+      "ご意見",
+      "不具合報告",
+      "アカウント削除申請",
+      "その他",
+    ];
+
+    const message = `\n[swit Contact]\n\nID: ${id}\nuid:${uid}\nName: ${name}\nEmail: ${email}\nSubject: ${subjectList[subject]}\nContent: \n${content}`;
+
+    const token = "B17yu5FnCELYOynkHLFVYBfrm38lrVICl7j9cwQZ6sB";
+    const options = {
+      hostname: "notify-api.line.me",
+      path: "/api/notify",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": `Bearer ${token}`,
+      },
+    };
+    const request = https.request(options, (res) => res.setEncoding("utf8"));
+    request.write(new URLSearchParams({ message: message }).toString());
+    request.end();
+  }
+);
+
+// 以下、使用する関数
+function calcLogs(bgn, now) {
+  if (bgn.getTime() > now.getTime()) return {};
+  if (
+    bgn.getFullYear() !== now.getFullYear() ||
+    bgn.getMonth() !== now.getMonth() ||
+    bgn.getDate() !== now.getDate()
+  ) {
+    const monthKey = getMonthKey(bgn);
+    const dateKey = getDateKey(bgn);
+    const baseDate = new Date(
+      bgn.getFullYear(),
+      bgn.getMonth(),
+      bgn.getDate() + 1
+    );
+    const diff = baseDate.getTime() - bgn.getTime();
+    const nextLogs = calcLogs(baseDate, now);
+    const monthLogs = nextLogs[monthKey] ? nextLogs[monthKey] : {};
+    return {
+      ...nextLogs,
+      [monthKey]: {
+        monthKey: monthKey,
+        ...monthLogs,
+        [dateKey]: FieldValue.increment(diff),
+      },
+    };
+  } else {
+    const monthKey = getMonthKey(bgn);
+    const dateKey = getDateKey(bgn);
+    const diff = now.getTime() - bgn.getTime();
+    return {
+      [monthKey]: {
+        monthKey: monthKey,
+        [dateKey]: FieldValue.increment(diff),
+      },
+    };
+  }
+}
+
+function getMonthKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+function getDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}

@@ -6,7 +6,6 @@ import '../../models/friend_state.dart';
 import '../../models/layout.dart';
 import '../../models/user_data.dart';
 import '../../providers/friend_states.dart';
-import '../../providers/friends_provider.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/user_tile.dart';
 import '../../widgets/setting_page_temp.dart';
@@ -16,22 +15,25 @@ class FriendsPage extends ConsumerWidget {
   final UserData myData;
 
   Future<List<UserData>> _getFriends(
-    List<UserData> friends,
     Map<String, String> userStates,
   ) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final List<String> blockedIds = [];
+    final List<UserData> friends = [];
+    final List<String> friendIds = [];
 
     userStates.forEach((String key, String value) {
-      if (value == FriendState.blocked) blockedIds.add(key);
+      if (value == FriendState.friend) friendIds.add(key);
     });
-    if (blockedIds.isEmpty) {
+    userStates.forEach((String key, String value) {
+      if (value == FriendState.blocked) friendIds.add(key);
+    });
+    if (friendIds.isEmpty) {
       return friends;
     }
 
     await firestore
         .collection('users')
-        .where('uid', whereIn: blockedIds)
+        .where('uid', whereIn: friendIds)
         .get()
         .then(
       (QuerySnapshot snapshot) {
@@ -49,13 +51,12 @@ class FriendsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    final List<UserData> friends = ref.watch(friendsProvider);
     final Map<String, String> friendStates = ref.watch(friendStatesProvider);
 
     return SettingPageTemp(
       title: 'フレンド一覧',
       child: FutureBuilder(
-        future: _getFriends(friends, friendStates),
+        future: _getFriends(friendStates),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final List<UserData> users = snapshot.data!;

@@ -11,12 +11,13 @@
       crossorigin="anonymous"
     />
 
+    <link rel="icon" href="./img/favicon.ico" />
     <link rel="stylesheet" href="css/style.css" type="text/css" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
       <div class="container">
-        <a class="navbar-brand" href="./index.html">SWiT Study</a>
+        <a class="navbar-brand" href="./">SWiT Study</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -47,21 +48,37 @@
     </nav>
 
     <main class="my-5">
-      <div class="container d-flex justify-content-center">
-        <img src="./img/swit_logo.svg" alt="SWiT Logo" />
+      <div class="container py-5 d-flex justify-content-center">
+        <img
+          class="w-50"
+          style="min-width: 150px; max-width: 200px"
+          src="./img/swit_logo.svg"
+          alt="SWiT Logo"
+        />
       </div>
 
-      <div class="container d-flex justify-content-center">
-        <img
-          class="my-5 mx-3"
-          src="./img/app_store_badge.png"
-          alt="App Store Badge"
-        />
-        <img
-          class="my-5 mx-3"
-          src="./img/google_play_badge.png"
-          alt="Google Play Badge"
-        />
+      <div
+        class="container py-5 w-75 d-flex justify-content-evenly"
+        style="max-width: 600px"
+      >
+        <a
+          class="w-25 d-flex align-items-center"
+          style="min-width: 130px; max-width: 160px"
+          href="https://apps.apple.com/jp/app/swit-study/id6497793213?itsct=apps_box_badge&amp;itscg=30200"
+          ><img
+            class="w-100 px-2"
+            src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83&amp;releaseDate=1714348800"
+            alt="Download on the App Store"
+        /></a>
+        <a
+          class="w-25 d-flex align-items-center"
+          style="min-width: 130px; max-width: 160px"
+          href="https://play.google.com/store/apps/details?id=com.swit91d08.swit&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"
+          ><img
+            class="w-100"
+            alt="Google Play で手に入れよう"
+            src="https://play.google.com/intl/en_us/badges/static/images/badges/ja_badge_web_generic.png"
+        /></a>
       </div>
     </main>
 

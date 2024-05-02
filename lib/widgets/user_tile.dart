@@ -9,7 +9,7 @@ import '../models/request.dart';
 import '../models/user_data.dart';
 import '../providers/friend_states.dart';
 import '../providers/layout_providers.dart';
-import '../providers/requesting_proivider.dart';
+import '../providers/requests_proivider.dart';
 import 'icon_widget.dart';
 import 'loading_dialog.dart';
 
@@ -30,55 +30,20 @@ class UserTile extends ConsumerWidget {
       builder: (context) {
         return CupertinoActionSheet(
           actions: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                LoadingDialog(_report()).show(context).then((_) {
-                  Navigator.of(context).pop();
-                });
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                LoadingDialog(_report()).show(context);
               },
-              child: Container(
-                width: double.infinity,
-                height: 57,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                color: layout.mainText.withOpacity(0.8),
-                alignment: Alignment.center,
-                child: Text(
-                  '${user.name} を報告',
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 18,
-                    color: layout.error,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
+              child: Text('${user.name} を報告'),
             ),
           ],
-          cancelButton: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: layout.mainText.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              width: double.infinity,
-              height: 57,
-              alignment: Alignment.center,
-              child: Text(
-                'キャンセル',
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: 18,
-                  color: layout.subBack,
-                  decoration: TextDecoration.none,
-                ),
-              ),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'キャンセル',
+              style: TextStyle(color: layout.subBack),
             ),
           ),
         );
@@ -97,11 +62,13 @@ class UserTile extends ConsumerWidget {
 
   Widget _userButton(
     Map<String, String> friendStates,
-    List<String> requesting,
+    List<Request> requests,
     Layout layout,
     BuildContext context,
   ) {
-    if (requesting.contains(user.uid)) {
+    final List<Request> tgt =
+        requests.where((Request r) => r.tgt == user.uid).toList();
+    if (tgt.isNotEmpty) {
       return OutlinedButton(
         onPressed: null,
         style: OutlinedButton.styleFrom(
@@ -233,7 +200,7 @@ class UserTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final Map<String, String> friendStates = ref.watch(friendStatesProvider);
-    final List<String> requesting = ref.watch(requestingProvider);
+    final List<Request> requests = ref.watch(requestsProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       width: double.infinity,
@@ -263,7 +230,7 @@ class UserTile extends ConsumerWidget {
             const SizedBox(width: 15),
             SizedBox(
               width: 130,
-              child: _userButton(friendStates, requesting, layout, context),
+              child: _userButton(friendStates, requests, layout, context),
             ),
           ],
         ),

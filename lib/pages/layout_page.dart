@@ -172,111 +172,46 @@ class BackImageSheet extends ConsumerWidget {
     return CupertinoActionSheet(
       actions: (layout.image == null)
           ? [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: () {
                   Navigator.of(context).pop();
                   LoadingDialog(selectImage(ref.read(layoutProvider.notifier)))
                       .show(context);
                 },
-                child: Container(
-                  width: double.infinity,
-                  height: 57,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  color: layout.mainText.withOpacity(0.8),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '画像を選択する',
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 18,
-                      color: layout.subBack,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
+                child: Text(
+                  'ライブラリから選択',
+                  style: TextStyle(color: layout.subBack),
                 ),
               ),
             ]
           : [
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
+              CupertinoActionSheetAction(
+                isDefaultAction: true,
+                onPressed: () {
                   Navigator.of(context).pop();
                   LoadingDialog(selectImage(ref.read(layoutProvider.notifier)))
                       .show(context);
                 },
-                child: Container(
-                  width: double.infinity,
-                  height: 57,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  color: layout.mainText.withOpacity(0.8),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '画像を選択',
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 18,
-                      color: layout.subBack,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
+                child: Text(
+                  'ライブラリから選択',
+                  style: TextStyle(color: layout.subBack),
                 ),
               ),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
+              CupertinoActionSheetAction(
+                isDestructiveAction: true,
+                onPressed: () {
                   Navigator.of(context).pop();
                   LoadingDialog(
                     ref.read(layoutProvider.notifier).changeImage(null),
                   ).show(context);
                 },
-                child: Container(
-                  width: double.infinity,
-                  height: 57,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  color: layout.mainText.withOpacity(0.8),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '画像を削除',
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 18,
-                      color: layout.error,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                ),
+                child: const Text('背景を削除'),
               ),
             ],
-      cancelButton: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: layout.mainText.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          width: double.infinity,
-          height: 57,
-          alignment: Alignment.center,
-          child: Text(
-            'キャンセル',
-            style: TextStyle(
-              fontWeight: FontWeight.w300,
-              fontSize: 18,
-              color: layout.subBack,
-              decoration: TextDecoration.none,
-            ),
-          ),
-        ),
+      cancelButton: CupertinoActionSheetAction(
+        onPressed: () => Navigator.of(context).pop(),
+        child: Text('キャンセル', style: TextStyle(color: layout.subBack)),
       ),
     );
   }
