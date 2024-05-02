@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Request {
-  final String id;
   final String uid;
   final String tgt;
   final String request;
 
   const Request({
-    this.id = '',
     required this.uid,
     required this.tgt,
     required this.request,
@@ -28,7 +26,6 @@ class Request {
   factory Request.fromFirestore(DocumentSnapshot doc) {
     final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Request(
-      id: doc.id,
       uid: data['uid'],
       tgt: data['tgt'],
       request: data['request'],
@@ -54,9 +51,5 @@ class Request {
 
   factory Request.unblockRequest(String uid, String tgt) {
     return Request(uid: uid, tgt: tgt, request: unblock);
-  }
-
-  Future<void> cancel() async {
-    if (id.isNotEmpty) await firestore.collection('requests').doc(id).delete();
   }
 }

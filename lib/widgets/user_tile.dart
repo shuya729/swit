@@ -30,55 +30,20 @@ class UserTile extends ConsumerWidget {
       builder: (context) {
         return CupertinoActionSheet(
           actions: [
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                LoadingDialog(_report()).show(context).then((_) {
-                  Navigator.of(context).pop();
-                });
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                LoadingDialog(_report()).show(context);
               },
-              child: Container(
-                width: double.infinity,
-                height: 57,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                color: layout.mainText.withOpacity(0.8),
-                alignment: Alignment.center,
-                child: Text(
-                  '${user.name} を報告',
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 18,
-                    color: layout.error,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
+              child: Text('${user.name} を報告'),
             ),
           ],
-          cancelButton: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: layout.mainText.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              width: double.infinity,
-              height: 57,
-              alignment: Alignment.center,
-              child: Text(
-                'キャンセル',
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: 18,
-                  color: layout.subBack,
-                  decoration: TextDecoration.none,
-                ),
-              ),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'キャンセル',
+              style: TextStyle(color: layout.subBack),
             ),
           ),
         );
@@ -105,7 +70,7 @@ class UserTile extends ConsumerWidget {
         requests.where((Request r) => r.tgt == user.uid).toList();
     if (tgt.isNotEmpty) {
       return OutlinedButton(
-        onPressed: () => LoadingDialog(_cancel(tgt)).show(context),
+        onPressed: null,
         style: OutlinedButton.styleFrom(
           visualDensity: VisualDensity.compact,
           padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -229,13 +194,6 @@ class UserTile extends ConsumerWidget {
 
   Future<void> _unblock() async {
     await Request.unblockRequest(myData.uid, user.uid).toFirestore();
-  }
-
-  Future<void> _cancel(List<Request> tgt) async {
-    if (tgt.isEmpty) return;
-    for (Request r in tgt) {
-      await r.cancel();
-    }
   }
 
   @override
