@@ -18,24 +18,29 @@ class SigninDialog extends ConsumerWidget {
     );
   }
 
-  Future<UserCredential> _signInWithGoogle() async {
+  Future<User?> _signInWithGoogle() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+    if (googleUser == null) return null;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
-    return await auth.signInWithCredential(credential);
+    final UserCredential userCredential =
+        await auth.signInWithCredential(credential);
+    return userCredential.user;
   }
 
-  Future<UserCredential> _singInWithApple() async {
+  Future<User?> _singInWithApple() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final appleProvider = AppleAuthProvider();
     appleProvider.addScope('email');
     appleProvider.addScope('name');
-    return await auth.signInWithProvider(appleProvider);
+    final UserCredential userCredential =
+        await auth.signInWithProvider(appleProvider);
+    return userCredential.user;
   }
 
   @override

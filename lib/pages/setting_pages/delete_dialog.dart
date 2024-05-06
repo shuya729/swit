@@ -19,30 +19,37 @@ class DeleteDialog extends ConsumerWidget {
     );
   }
 
-  Future<void> _reauthWithGoogle() async {
+  Future<User?> _reauthWithGoogle() async {
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn().signInSilently();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    if (googleUser == null) return null;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
-    await user.reauthenticateWithCredential(credential);
+    final UserCredential userCredential =
+        await user.reauthenticateWithCredential(credential);
+    return userCredential.user;
   }
 
-  Future<void> _reauthWithApple() async {
+  Future<User?> _reauthWithApple() async {
     final appleProvider = AppleAuthProvider();
-    await user.reauthenticateWithProvider(appleProvider);
+    final UserCredential userCredential =
+        await user.reauthenticateWithProvider(appleProvider);
+    return userCredential.user;
   }
 
   Future<void> _delete() async {
     final Presence presence = Presence();
+    User? reauthUser;
     if (user.providerData[0].providerId == 'google.com') {
-      await _reauthWithGoogle();
+      reauthUser = await _reauthWithGoogle();
     } else if (user.providerData[0].providerId == 'apple.com') {
-      await _reauthWithApple();
+      reauthUser = await _reauthWithApple();
     } else {}
+    if (reauthUser == null) return;
     await presence.paused();
     await user.delete();
   }

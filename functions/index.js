@@ -82,7 +82,13 @@ exports.deleteFunction = user().onDelete(async (user) => {
 });
 
 exports.requestFunction = onDocumentCreated(
-  "requests/{requestId}",
+  {
+    document: "requests/{requestId}",
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const data = event.data.data();
 
@@ -132,7 +138,13 @@ exports.requestFunction = onDocumentCreated(
 );
 
 exports.presenceFunction = onValueCreated(
-  "/presence/{presenceId}",
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const presenceId = event.params.presenceId;
     const uid = event.data.val().uid;
@@ -165,7 +177,13 @@ exports.presenceFunction = onValueCreated(
 );
 
 exports.logFunction = onValueDeleted(
-  "/presence/{presenceId}",
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const uid = event.data.val().uid;
     const time = event.data.val().time;
@@ -207,50 +225,76 @@ exports.logFunction = onValueDeleted(
   }
 );
 
-exports.presenceCroller = onSchedule("0 * * * *", async (event) => {
-  const now = new Date();
-  const baseTime = 60 * 60 * 1000;
-  const query = database
-    .ref("presence")
-    .orderByChild("time")
-    .endAt(now - baseTime)
-    .limitToFirst(100);
-  const snapshot = await query.get();
+exports.presenceCroller = onSchedule(
+  {
+    schedule: "0 * * * *",
+    timeZone: timezone,
+    concurrency: 1,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const now = new Date();
+    const baseTime = 60 * 60 * 1000;
+    const query = database
+      .ref("presence")
+      .orderByChild("time")
+      .endAt(now - baseTime)
+      .limitToFirst(100);
+    const snapshot = await query.get();
 
-  if (!snapshot.exists()) return;
+    if (!snapshot.exists()) return;
 
-  console.log("delete presence num: ", snapshot.numChildren());
+    console.log("delete presence num: ", snapshot.numChildren());
 
-  let newData = {};
-  snapshot.forEach((child) => {
-    newData[child.key] = null;
-  });
+    let newData = {};
+    snapshot.forEach((child) => {
+      newData[child.key] = null;
+    });
 
-  database.ref("presence").update(newData);
-});
+    database.ref("presence").update(newData);
+  }
+);
 
-exports.requestCroller = onSchedule("30 * * * *", async (event) => {
-  const now = new Date();
-  const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
-  const query = firestore
-    .collection("requests")
-    .where("credt", "<", baseDate)
-    .limit(100);
-  const snapshot = await query.get();
+exports.requestCroller = onSchedule(
+  {
+    schedule: "30 * * * *",
+    timeZone: timezone,
+    concurrency: 1,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const now = new Date();
+    const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
+    const query = firestore
+      .collection("requests")
+      .where("credt", "<", baseDate)
+      .limit(100);
+    const snapshot = await query.get();
 
-  if (snapshot.empty) return;
+    if (snapshot.empty) return;
 
-  console.log("delete requests num: ", snapshot.size);
+    console.log("delete requests num: ", snapshot.size);
 
-  const batch = firestore.batch();
-  snapshot.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-  await batch.commit();
-});
+    const batch = firestore.batch();
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  }
+);
 
 exports.contactFunction = onDocumentCreated(
-  "contacts/{contactId}",
+  {
+    document: "contacts/{contactId}",
+    concurrency: 1,
+    cpu: 0.083,
+    memory: "128MiB",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const data = event.data.data();
 
@@ -337,3 +381,9 @@ function getDateKey(date) {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+// const { onRequest } = require("firebase-functions/v2/https");
+// exports.testFunction = onRequest(async (req, res) => {
+
+//   res.send("ok");
+// });
