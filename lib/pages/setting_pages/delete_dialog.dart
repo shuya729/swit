@@ -42,7 +42,7 @@ class DeleteDialog extends ConsumerWidget {
   }
 
   Future<void> _delete() async {
-    final Presence presence = Presence();
+    final Presence presence = Presence.instance;
     User? reauthUser;
     if (user.providerData[0].providerId == 'google.com') {
       reauthUser = await _reauthWithGoogle();

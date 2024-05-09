@@ -19,7 +19,7 @@ class SignoutDialog extends ConsumerWidget {
 
   Future<void> _signOut() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
-    final Presence presence = Presence();
+    final Presence presence = Presence.instance;
     await presence.paused();
     await auth.signOut();
   }

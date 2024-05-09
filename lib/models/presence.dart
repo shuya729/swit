@@ -4,13 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class Presence {
-  static final Presence _instance = Presence._internal();
-
-  factory Presence() => _instance;
+  static final Presence instance = Presence._internal();
 
   User? _user;
   String _postKey = '';
   Timer? _timer;
+
+  final StreamController<bool> _connectedController =
+      StreamController<bool>.broadcast();
+  Stream<bool> get connectedStream => _connectedController.stream;
 
   static final FirebaseAuth auth = FirebaseAuth.instance;
   static final FirebaseDatabase database = FirebaseDatabase.instance;
@@ -30,11 +32,13 @@ class Presence {
         _user = null;
         await paused();
         _postKey = '';
+        _connectedController.add(true);
       } else {
         _user = user;
         await resumed();
         connectedRef.onValue.listen((event) {
           final bool connected = event.snapshot.value as bool? ?? false;
+          _connectedController.add(connected);
           if (connected) {
             final DateTime now = DateTime.now();
             final DatabaseReference preRef = presenceRef.push();
@@ -59,6 +63,7 @@ class Presence {
   }
 
   Future<void> paused() async {
+    if (_user == null) return;
     await database.goOffline();
     _timer?.cancel();
   }

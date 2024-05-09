@@ -180,7 +180,7 @@ class Main extends ConsumerStatefulWidget {
 }
 
 class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
-  final Presence _presence = Presence();
+  final Presence _presence = Presence.instance;
   late final PageController _pageController;
   double _opacity = 1.0;
 

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../models/layout.dart';
+import '../models/presence.dart';
 import '../models/user_data.dart';
 import '../providers/friends_provider.dart';
 import '../providers/layout_providers.dart';
@@ -205,17 +206,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
 class FriendsWidget extends ConsumerWidget {
   const FriendsWidget({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    final List<UserData> friends = ref.watch(friendsProvider);
-    final List<UserData> activeFriends =
-        friends.where((friend) => friend.bgndt != null).toList();
-
-    if (activeFriends.isEmpty) {
-      return const SizedBox(height: 48);
-    }
-
+  Widget _friendsBack({required Layout layout, required Widget child}) {
     return Container(
       height: 48,
       clipBehavior: Clip.antiAlias,
@@ -227,22 +218,101 @@ class FriendsWidget extends ConsumerWidget {
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: activeFriends.length,
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          itemBuilder: (context, index) {
-            final UserData friend = activeFriends[index];
-            return Padding(
-              padding: const EdgeInsets.all(3),
-              child: Center(
-                child: IconWidget(friend.image, radius: 19.4),
-              ),
-            );
-          },
-        ),
+        child: child,
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Presence presence = Presence.instance;
+    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+    final List<UserData> friends = ref.watch(friendsProvider);
+    final List<UserData> activeFriends =
+        friends.where((friend) => friend.bgndt != null).toList();
+
+    return StreamBuilder(
+      stream: presence.connectedStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data == false) {
+          return FutureBuilder(
+            future: Future.delayed(const Duration(seconds: 10)),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return _friendsBack(
+                  layout: layout,
+                  child: SizedBox(
+                    width: 56,
+                    child: Center(
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: layout.subText,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return _friendsBack(
+                  layout: layout,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "インターネット接続がありません",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 13,
+                            color: layout.mainText,
+                          ),
+                        ),
+                        Text(
+                          "ログの記録やフレンドへの表示が行われません",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 13,
+                            color: layout.mainText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+            },
+          );
+        }
+
+        if (activeFriends.isEmpty) {
+          return const SizedBox(height: 48);
+        }
+
+        return _friendsBack(
+          layout: layout,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: activeFriends.length,
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            itemBuilder: (context, index) {
+              final UserData friend = activeFriends[index];
+              return Padding(
+                padding: const EdgeInsets.all(3),
+                child: Center(
+                  child: IconWidget(friend.image, radius: 19.4),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

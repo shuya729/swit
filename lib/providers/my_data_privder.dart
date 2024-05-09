@@ -23,7 +23,7 @@ class MyDataNotifier extends StateNotifier<UserData?> {
         _firestore.collection('users').doc(_user.uid).snapshots();
     await for (DocumentSnapshot doc in stream) {
       if (doc.exists) {
-        print(UserData.fromFirestore(doc).bgndt);
+        print('bgndt: ${UserData.fromFirestore(doc).bgndt}');
         if (mounted) state = UserData.fromFirestore(doc);
       } else {
         if (mounted) state = null;
