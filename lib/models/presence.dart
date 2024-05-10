@@ -9,6 +9,7 @@ class Presence {
   User? _user;
   String _postKey = '';
   Timer? _timer;
+  bool connected = false;
 
   final StreamController<bool> _connectedController =
       StreamController<bool>.broadcast();
@@ -37,7 +38,7 @@ class Presence {
         _user = user;
         await resumed();
         connectedRef.onValue.listen((event) {
-          final bool connected = event.snapshot.value as bool? ?? false;
+          connected = event.snapshot.value as bool? ?? false;
           _connectedController.add(connected);
           if (connected) {
             final DateTime now = DateTime.now();

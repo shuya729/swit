@@ -232,6 +232,7 @@ class FriendsWidget extends ConsumerWidget {
         friends.where((friend) => friend.bgndt != null).toList();
 
     return StreamBuilder(
+      initialData: presence.connected,
       stream: presence.connectedStream,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data == false) {
