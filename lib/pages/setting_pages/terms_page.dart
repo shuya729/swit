@@ -9,7 +9,7 @@ import '../../models/config.dart';
 import '../../models/layout.dart';
 import '../../models/terms_text.dart';
 import '../../providers/layout_providers.dart';
-import '../../widgets/setting_page_temp.dart';
+import '../../widgets/setting_widget.dart';
 
 class TermsPage extends ConsumerWidget {
   const TermsPage(this.isPrivacy, {super.key, this.fromDialog = false});
@@ -42,7 +42,9 @@ class TermsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    return SettingPageTemp(
+    return SettingWidget.pageTemp(
+      context: context,
+      layout: layout,
       title: isPrivacy ? 'プライバシーポリシー' : '利用規約',
       fromDialog: fromDialog,
       child: FutureBuilder(

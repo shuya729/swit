@@ -21,7 +21,7 @@ import 'pages/layout_page.dart';
 import 'pages/logs_page.dart';
 import 'pages/setting_pages/terms_page.dart';
 import 'providers/layout_providers.dart';
-import 'widgets/setting_page_temp.dart';
+import 'widgets/setting_widget.dart';
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +45,7 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   Future<Config> _futureConfig() async {
@@ -55,7 +55,7 @@ class MyApp extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final Layout layout = Layout.def;
     return MaterialApp(
       // debugShowCheckedModeBanner: false, // サンプル用
@@ -347,7 +347,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingPageTemp.push(
+                            onPressed: () => SettingWidget.push(
                               context,
                               _termsPage(layout, false),
                             ),
@@ -390,7 +390,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingPageTemp.push(
+                            onPressed: () => SettingWidget.push(
                               context,
                               _termsPage(layout, true),
                             ),

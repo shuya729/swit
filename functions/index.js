@@ -87,6 +87,7 @@ exports.requestFunction = onDocumentCreated(
     concurrency: 50,
     cpu: 1,
     memory: "256MiB",
+    // minInstances: 1,
     timeoutSeconds: 10,
   },
   async (event) => {
@@ -142,51 +143,13 @@ exports.presenceFunction = onValueCreated(
     concurrency: 50,
     cpu: 1,
     memory: "256MiB",
-    ref: "/presence/{presenceId}",
-    timeoutSeconds: 10,
-  },
-  async (event) => {
-    const presenceId = event.params.presenceId;
-    const uid = event.data.val().uid;
-    const now = new Date();
-    const baseTime = 60 * 60 * 1000;
-    const userRef = firestore.collection("users").doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return;
-    const bgndt = userDoc.data().bgndt;
-    if (bgndt !== null) {
-      const snapshot = await event.data.ref.parent
-        .orderByChild("uid")
-        .equalTo(uid)
-        .get();
-
-      if (!snapshot.exists()) return;
-      let count = 0;
-      snapshot.forEach((child) => {
-        if (
-          child.key !== presenceId &&
-          child.val().time > now.getTime() - baseTime
-        ) {
-          count++;
-        }
-      });
-      if (count > 0) return;
-    }
-    userRef.update({ bgndt: now, upddt: now });
-  }
-);
-
-exports.logFunction = onValueDeleted(
-  {
-    concurrency: 50,
-    cpu: 1,
-    memory: "256MiB",
+    // minInstances: 1,
     ref: "/presence/{presenceId}",
     timeoutSeconds: 10,
   },
   async (event) => {
     const uid = event.data.val().uid;
-    const time = event.data.val().time;
+    const bgn = new Date(event.data.val().credt);
     const now = new Date();
     const baseTime = 60 * 60 * 1000;
     const userRef = firestore.collection("users").doc(uid);
@@ -195,24 +158,63 @@ exports.logFunction = onValueDeleted(
       .orderByChild("uid")
       .equalTo(uid)
       .get();
-    let count = 0;
+
+    if (!snapshot.exists()) return;
+    let mindt = bgn.getTime();
+    snapshot.forEach((child) => {
+      if (
+        child.val().upddt > now.getTime() - baseTime &&
+        child.val().credt < mindt
+      ) {
+        mindt = child.val().credt;
+      }
+    });
+    if (mindt !== bgn.getTime()) return;
+
+    userRef.update({ bgndt: bgn, upddt: now });
+  }
+);
+
+exports.logFunction = onValueDeleted(
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    // minInstances: 1,
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
+  async (event) => {
+    const uid = event.data.val().uid;
+    const upddt = event.data.val().upddt;
+    const bgn = new Date(event.data.val().credt);
+    const now = new Date();
+    const baseTime = 60 * 60 * 1000;
+    const userRef = firestore.collection("users").doc(uid);
+
+    const snapshot = await event.data.ref.parent
+      .orderByChild("uid")
+      .equalTo(uid)
+      .get();
+
+    let mindt = null;
     if (snapshot.exists()) {
       snapshot.forEach((child) => {
-        if (child.val().time > now.getTime() - baseTime) count++;
+        if (
+          child.val().upddt > now.getTime() - baseTime &&
+          (mindt === null || child.val().credt < mindt)
+        ) {
+          mindt = child.val().credt;
+        }
       });
     }
-    if (count > 0) return;
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return;
-    const bgndt = userDoc.data().bgndt;
-    if (bgndt === null) return;
-    userRef.update({ bgndt: null, upddt: now });
+    const min = mindt ? new Date(mindt) : null;
+    userRef.update({ bgndt: min, upddt: now });
 
-    if (time < now.getTime() - baseTime) return;
-    const bgn = bgndt.toDate();
-    const logs = calcLogs(bgn, now);
+    if (upddt < now.getTime() - baseTime) return;
+    const end = min ?? now;
+    const logs = calcLogs(bgn, end);
     const batch = firestore.batch();
-
     Object.keys(logs).forEach((key) => {
       const logRef = firestore
         .collection("users")
@@ -221,7 +223,7 @@ exports.logFunction = onValueDeleted(
         .doc(key);
       batch.set(logRef, logs[key], { merge: true });
     });
-    await batch.commit();
+    batch.commit();
   }
 );
 
@@ -239,7 +241,7 @@ exports.presenceCroller = onSchedule(
     const baseTime = 60 * 60 * 1000;
     const query = database
       .ref("presence")
-      .orderByChild("time")
+      .orderByChild("upddt")
       .endAt(now - baseTime)
       .limitToFirst(100);
     const snapshot = await query.get();
@@ -283,7 +285,7 @@ exports.requestCroller = onSchedule(
     snapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
-    await batch.commit();
+    batch.commit();
   }
 );
 

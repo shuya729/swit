@@ -18,11 +18,18 @@ class Presence {
   static final FirebaseAuth auth = FirebaseAuth.instance;
   static final FirebaseDatabase database = FirebaseDatabase.instance;
 
-  Map<String, Object> data(String uid, int time) {
-    return {
-      "uid": uid,
-      "time": time,
-    };
+  Map<String, Object> data(String uid, bool isUpdate) {
+    if (isUpdate) {
+      return {
+        "upddt": ServerValue.timestamp,
+      };
+    } else {
+      return {
+        "uid": uid,
+        "credt": ServerValue.timestamp,
+        "upddt": ServerValue.timestamp,
+      };
+    }
   }
 
   static final DatabaseReference presenceRef = database.ref('presence');
@@ -41,10 +48,9 @@ class Presence {
           connected = event.snapshot.value as bool? ?? false;
           _connectedController.add(connected);
           if (connected) {
-            final DateTime now = DateTime.now();
             final DatabaseReference preRef = presenceRef.push();
             preRef.onDisconnect().remove();
-            preRef.set(data(user.uid, now.millisecondsSinceEpoch));
+            preRef.set(data(user.uid, false));
             _postKey = preRef.key ?? '';
           }
         });
@@ -57,9 +63,8 @@ class Presence {
     await database.goOnline();
     _timer = Timer.periodic(const Duration(minutes: 50), (_) {
       if (_user == null || _postKey.isEmpty) return;
-      final DateTime now = DateTime.now();
       final DatabaseReference preRef = presenceRef.child(_postKey);
-      preRef.update(data(_user!.uid, now.millisecondsSinceEpoch));
+      preRef.update(data(_user!.uid, true));
     });
   }
 
