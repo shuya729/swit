@@ -74,11 +74,11 @@ class _LicensesPageState extends SettingState<LicensesPage> {
         final List<List<LicenseParagraph>> paragraphs =
             packages.values.toList()[index];
 
-        return SettingSheet.settingItem(
+        return SettingSheetState.settingItem(
           layout: layout,
           menu: package,
           onTap: () =>
-              SettingWidget.push(context, LicenseChild(package, paragraphs)),
+              SettingState.push(context, LicenseChild(package, paragraphs)),
         );
       },
     );

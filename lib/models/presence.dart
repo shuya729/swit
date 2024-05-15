@@ -40,6 +40,7 @@ class Presence {
         _user = null;
         await paused();
         _postKey = '';
+        connected = true;
         _connectedController.add(true);
       } else {
         _user = user;

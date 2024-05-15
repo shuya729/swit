@@ -6,12 +6,12 @@ import '../models/user_data.dart';
 import 'friend_states.dart';
 
 final friendsProvider =
-    StateNotifierProvider<FriendsNotifier, List<UserData>>((ref) {
-  return FriendsNotifier(ref);
+    StateNotifierProvider<_FriendsNotifier, List<UserData>>((ref) {
+  return _FriendsNotifier(ref);
 });
 
-class FriendsNotifier extends StateNotifier<List<UserData>> {
-  FriendsNotifier(this._ref) : super([]) {
+class _FriendsNotifier extends StateNotifier<List<UserData>> {
+  _FriendsNotifier(this._ref) : super([]) {
     _init();
   }
 

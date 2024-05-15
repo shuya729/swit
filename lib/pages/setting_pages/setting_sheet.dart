@@ -10,7 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/layout_providers.dart';
 import '../../providers/my_data_privder.dart';
 import '../../widgets/icon_widget.dart';
-import '../../widgets/setting_widget.dart';
+import '../../widgets/setting_state.dart';
 import 'bolocking_page.dart';
 import 'contact_page.dart';
 import 'delete_dialog.dart';
@@ -25,9 +25,14 @@ import 'signin_dialog.dart';
 import 'signout_dialog.dart';
 import 'terms_page.dart';
 
-class SettingSheet extends ConsumerWidget {
+class SettingSheet extends ConsumerStatefulWidget {
   const SettingSheet({super.key});
 
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => SettingSheetState();
+}
+
+class SettingSheetState extends SettingState<SettingSheet> {
   static Widget settingItem({
     required String menu,
     required Layout layout,
@@ -87,12 +92,12 @@ class SettingSheet extends ConsumerWidget {
         settingItem(
           menu: 'サインアウト',
           layout: layout,
-          onTap: () => const SignoutDialog().show(context),
+          onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
         settingItem(
           menu: 'アカウント削除',
           layout: layout,
-          onTap: () => DeleteDialog(user!).show(context),
+          onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
     } else if (dataState.hasError) {
@@ -108,7 +113,7 @@ class SettingSheet extends ConsumerWidget {
         settingItem(
           menu: 'サインイン',
           layout: layout,
-          onTap: () => const SigninDialog().show(context),
+          onTap: () => SigninDialog(showMsgbar).show(context),
         ),
       ];
     } else {
@@ -118,7 +123,7 @@ class SettingSheet extends ConsumerWidget {
           height: 80,
           alignment: Alignment.topCenter,
           child: GestureDetector(
-              onTap: () => SettingWidget.push(context, IconPage(myData)),
+              onTap: () => SettingState.push(context, IconPage(myData)),
               child: IconWidget(myData.image, radius: 35)),
         ),
         Row(
@@ -158,44 +163,44 @@ class SettingSheet extends ConsumerWidget {
         settingItem(
           menu: myData.name.isEmpty ? '名前' : myData.name,
           layout: layout,
-          onTap: () => SettingWidget.push(context, NamePage(myData)),
+          onTap: () => SettingState.push(context, NamePage(myData)),
         ),
         settingItem(
           menu: 'サインアウト',
           layout: layout,
-          onTap: () => const SignoutDialog().show(context),
+          onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
         settingItem(
           menu: 'アカウント削除',
           layout: layout,
-          onTap: () => DeleteDialog(user!).show(context),
+          onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
       settingMenus['フレンド'] = [
         settingItem(
           menu: 'フレンド一覧',
           layout: layout,
-          onTap: () => SettingWidget.push(context, FriendsPage(myData)),
+          onTap: () => SettingState.push(context, FriendsPage(myData)),
         ),
         settingItem(
           menu: 'フレンド追加',
           layout: layout,
-          onTap: () => SettingWidget.push(context, SearchPage(myData)),
+          onTap: () => SettingState.push(context, SearchPage(myData)),
         ),
         settingItem(
           menu: '送信リクエスト',
           layout: layout,
-          onTap: () => SettingWidget.push(context, RequestingPage(myData)),
+          onTap: () => SettingState.push(context, RequestingPage(myData)),
         ),
         settingItem(
           menu: '受信リクエスト',
           layout: layout,
-          onTap: () => SettingWidget.push(context, RequestedPage(myData)),
+          onTap: () => SettingState.push(context, RequestedPage(myData)),
         ),
         settingItem(
           menu: 'ブロックリスト',
           layout: layout,
-          onTap: () => SettingWidget.push(context, BlockingPage(myData)),
+          onTap: () => SettingState.push(context, BlockingPage(myData)),
         ),
       ];
     }
@@ -204,91 +209,89 @@ class SettingSheet extends ConsumerWidget {
       settingItem(
         menu: '利用規約',
         layout: layout,
-        onTap: () => SettingWidget.push(context, const TermsPage(false)),
+        onTap: () => SettingState.push(context, const TermsPage(false)),
       ),
       settingItem(
         menu: 'プライバシーポリシー',
         layout: layout,
-        onTap: () => SettingWidget.push(context, const TermsPage(true)),
+        onTap: () => SettingState.push(context, const TermsPage(true)),
       ),
       settingItem(
         menu: 'ライセンス情報',
         layout: layout,
-        onTap: () => SettingWidget.push(context, const LicensesPage()),
+        onTap: () => SettingState.push(context, const LicensesPage()),
       ),
       settingItem(
         menu: 'お問い合わせ',
         layout: layout,
-        onTap: () => SettingWidget.push(context, ContactPage(user, myData)),
+        onTap: () => SettingState.push(context, ContactPage(user, myData)),
       ),
     ];
 
     return settingMenus;
   }
 
-  Widget _settingWidget(BuildContext context, Layout layout,
-      Map<String, List<Widget>> settingMenus) {
-    final List<Widget> children = [];
-    settingMenus.forEach((key, value) {
-      children.addAll([
-        const SizedBox(height: 15),
-        Text(
-          key,
-          style: TextStyle(
-              fontWeight: FontWeight.w300, fontSize: 16, color: layout.subText),
-        ),
-        const SizedBox(height: 5),
-        ...value,
-        const SizedBox(height: 15),
-      ]);
-    });
-    return SettingWidget.pageTemp(
-      context: context,
-      layout: layout,
-      title: '設定',
-      isRoot: true,
-      child: ListView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom + 40,
-        ),
-        children: children,
-      ),
-    );
-  }
+  @override
+  String get title => '設定';
+  @override
+  bool get isRoot => true;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget buildChild(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final User? user = ref.watch(authProvider);
     final UserData? myData = ref.watch(myDataProvider);
+    final List<Widget> children = [];
+    late final Map<String, List<Widget>> settingMenus;
 
     if (user == null) {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
+      settingMenus = _getSettingMenus(
         context: context,
         layout: layout,
         myData: null,
         user: null,
         dataState: DataState.normal(),
       );
-      return _settingWidget(context, layout, settingMenus);
     } else if (myData == null) {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
+      settingMenus = _getSettingMenus(
         context: context,
         layout: layout,
         myData: null,
         user: user,
         dataState: DataState.loading(),
       );
-      return _settingWidget(context, layout, settingMenus);
     } else {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
+      settingMenus = _getSettingMenus(
         context: context,
         layout: layout,
         myData: myData,
         user: user,
         dataState: DataState.normal(),
       );
-      return _settingWidget(context, layout, settingMenus);
     }
+
+    settingMenus.forEach((key, value) {
+      children.addAll([
+        const SizedBox(height: 15),
+        Text(
+          key,
+          style: TextStyle(
+            fontWeight: FontWeight.w300,
+            fontSize: 16,
+            color: layout.subText,
+          ),
+        ),
+        const SizedBox(height: 5),
+        ...value,
+        const SizedBox(height: 15),
+      ]);
+    });
+
+    return ListView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 40,
+      ),
+      children: children,
+    );
   }
 }

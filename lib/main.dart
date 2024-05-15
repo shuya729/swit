@@ -21,7 +21,7 @@ import 'pages/layout_page.dart';
 import 'pages/logs_page.dart';
 import 'pages/setting_pages/terms_page.dart';
 import 'providers/layout_providers.dart';
-import 'widgets/setting_widget.dart';
+import 'widgets/setting_state.dart';
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -347,7 +347,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingWidget.push(
+                            onPressed: () => SettingState.push(
                               context,
                               _termsPage(layout, false),
                             ),
@@ -390,7 +390,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingWidget.push(
+                            onPressed: () => SettingState.push(
                               context,
                               _termsPage(layout, true),
                             ),

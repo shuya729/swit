@@ -237,7 +237,7 @@ class FriendsWidget extends ConsumerWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data == false) {
           return FutureBuilder(
-            future: Future.delayed(const Duration(seconds: 10)),
+            future: Future.delayed(const Duration(seconds: 60)),
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _friendsBack(

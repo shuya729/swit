@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_data.dart';
 import 'auth_provider.dart';
 
-final myDataProvider = StateNotifierProvider<MyDataNotifier, UserData?>((ref) {
+final myDataProvider = StateNotifierProvider<_MyDataNotifier, UserData?>((ref) {
   final User? user = ref.watch(authProvider);
-  return MyDataNotifier(user);
+  return _MyDataNotifier(user);
 });
 
-class MyDataNotifier extends StateNotifier<UserData?> {
-  MyDataNotifier(this._user) : super(null) {
+class _MyDataNotifier extends StateNotifier<UserData?> {
+  _MyDataNotifier(this._user) : super(null) {
     _init();
   }
   final User? _user;

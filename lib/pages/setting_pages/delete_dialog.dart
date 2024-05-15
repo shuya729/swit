@@ -9,7 +9,7 @@ import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
 
 class DeleteDialog extends SettingDialog {
-  const DeleteDialog(this.user, {super.key});
+  const DeleteDialog(this.user, super.showMsgbar, {super.key});
   final User user;
 
   Future<User?> _reauthWithGoogle() async {
@@ -37,14 +37,18 @@ class DeleteDialog extends SettingDialog {
   Future<void> _delete() async {
     final Presence presence = Presence.instance;
     User? reauthUser;
-    if (user.providerData[0].providerId == 'google.com') {
-      reauthUser = await _reauthWithGoogle();
-    } else if (user.providerData[0].providerId == 'apple.com') {
-      reauthUser = await _reauthWithApple();
-    } else {}
-    if (reauthUser == null) return;
-    await presence.paused();
-    await user.delete();
+    try {
+      if (user.providerData[0].providerId == 'google.com') {
+        reauthUser = await _reauthWithGoogle();
+      } else if (user.providerData[0].providerId == 'apple.com') {
+        reauthUser = await _reauthWithApple();
+      } else {}
+      if (reauthUser == null) return;
+      await presence.paused();
+      await user.delete();
+    } catch (e) {
+      showMsgbar('アカウントの削除に失敗しました。');
+    }
   }
 
   @override

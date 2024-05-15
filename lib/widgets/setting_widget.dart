@@ -12,17 +12,6 @@ abstract class SettingWidget extends ConsumerWidget {
   const SettingWidget(this.myData, {super.key});
   final UserData myData;
 
-  static Future<void> push(BuildContext context, Widget next) async {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => next,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
-  }
-
   static Widget pageTemp({
     required BuildContext context,
     required Layout layout,

@@ -5,7 +5,8 @@ import '../../models/layout.dart';
 import '../../providers/layout_providers.dart';
 
 abstract class SettingDialog extends ConsumerWidget {
-  const SettingDialog({super.key});
+  const SettingDialog(this.showMsgbar, {super.key});
+  final void Function(String message) showMsgbar;
 
   Future<void> show(BuildContext context) async {
     await showDialog(

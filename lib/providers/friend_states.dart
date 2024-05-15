@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_provider.dart';
 
 final friendStatesProvider =
-    StateNotifierProvider<FriendStatesNotifier, Map<String, String>>((ref) {
+    StateNotifierProvider<_FriendStatesNotifier, Map<String, String>>((ref) {
   final User? auth = ref.watch(authProvider);
-  return FriendStatesNotifier(auth);
+  return _FriendStatesNotifier(auth);
 });
 
-class FriendStatesNotifier extends StateNotifier<Map<String, String>> {
-  FriendStatesNotifier(this._user) : super({}) {
+class _FriendStatesNotifier extends StateNotifier<Map<String, String>> {
+  _FriendStatesNotifier(this._user) : super({}) {
     _init();
   }
   final User? _user;

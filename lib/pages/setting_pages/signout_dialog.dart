@@ -8,13 +8,17 @@ import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
 
 class SignoutDialog extends SettingDialog {
-  const SignoutDialog({super.key});
+  const SignoutDialog(super.showMsgbar, {super.key});
 
   Future<void> _signOut() async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final Presence presence = Presence.instance;
-    await presence.paused();
-    await auth.signOut();
+    try {
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      final Presence presence = Presence.instance;
+      await presence.paused();
+      await auth.signOut();
+    } catch (e) {
+      showMsgbar('サインアウトに失敗しました。');
+    }
   }
 
   @override
