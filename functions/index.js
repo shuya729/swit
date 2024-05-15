@@ -82,7 +82,14 @@ exports.deleteFunction = user().onDelete(async (user) => {
 });
 
 exports.requestFunction = onDocumentCreated(
-  "requests/{requestId}",
+  {
+    document: "requests/{requestId}",
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    // minInstances: 1,
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const data = event.data.data();
 
@@ -132,43 +139,17 @@ exports.requestFunction = onDocumentCreated(
 );
 
 exports.presenceFunction = onValueCreated(
-  "/presence/{presenceId}",
-  async (event) => {
-    const presenceId = event.params.presenceId;
-    const uid = event.data.val().uid;
-    const now = new Date();
-    const baseTime = 60 * 60 * 1000;
-    const userRef = firestore.collection("users").doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return;
-    const bgndt = userDoc.data().bgndt;
-    if (bgndt !== null) {
-      const snapshot = await event.data.ref.parent
-        .orderByChild("uid")
-        .equalTo(uid)
-        .get();
-
-      if (!snapshot.exists()) return;
-      let count = 0;
-      snapshot.forEach((child) => {
-        if (
-          child.key !== presenceId &&
-          child.val().time > now.getTime() - baseTime
-        ) {
-          count++;
-        }
-      });
-      if (count > 0) return;
-    }
-    userRef.update({ bgndt: now, upddt: now });
-  }
-);
-
-exports.logFunction = onValueDeleted(
-  "/presence/{presenceId}",
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    // minInstances: 1,
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const uid = event.data.val().uid;
-    const time = event.data.val().time;
+    const bgn = new Date(event.data.val().credt);
     const now = new Date();
     const baseTime = 60 * 60 * 1000;
     const userRef = firestore.collection("users").doc(uid);
@@ -177,24 +158,63 @@ exports.logFunction = onValueDeleted(
       .orderByChild("uid")
       .equalTo(uid)
       .get();
-    let count = 0;
+
+    if (!snapshot.exists()) return;
+    let mindt = bgn.getTime();
+    snapshot.forEach((child) => {
+      if (
+        child.val().upddt > now.getTime() - baseTime &&
+        child.val().credt < mindt
+      ) {
+        mindt = child.val().credt;
+      }
+    });
+    if (mindt !== bgn.getTime()) return;
+
+    userRef.update({ bgndt: bgn, upddt: now });
+  }
+);
+
+exports.logFunction = onValueDeleted(
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    // minInstances: 1,
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
+  async (event) => {
+    const uid = event.data.val().uid;
+    const upddt = event.data.val().upddt;
+    const bgn = new Date(event.data.val().credt);
+    const now = new Date();
+    const baseTime = 60 * 60 * 1000;
+    const userRef = firestore.collection("users").doc(uid);
+
+    const snapshot = await event.data.ref.parent
+      .orderByChild("uid")
+      .equalTo(uid)
+      .get();
+
+    let mindt = null;
     if (snapshot.exists()) {
       snapshot.forEach((child) => {
-        if (child.val().time > now.getTime() - baseTime) count++;
+        if (
+          child.val().upddt > now.getTime() - baseTime &&
+          (mindt === null || child.val().credt < mindt)
+        ) {
+          mindt = child.val().credt;
+        }
       });
     }
-    if (count > 0) return;
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return;
-    const bgndt = userDoc.data().bgndt;
-    if (bgndt === null) return;
-    userRef.update({ bgndt: null, upddt: now });
+    const min = mindt ? new Date(mindt) : null;
+    userRef.update({ bgndt: min, upddt: now });
 
-    if (time < now.getTime() - baseTime) return;
-    const bgn = bgndt.toDate();
-    const logs = calcLogs(bgn, now);
+    if (upddt < now.getTime() - baseTime) return;
+    const end = min ?? now;
+    const logs = calcLogs(bgn, end);
     const batch = firestore.batch();
-
     Object.keys(logs).forEach((key) => {
       const logRef = firestore
         .collection("users")
@@ -203,54 +223,80 @@ exports.logFunction = onValueDeleted(
         .doc(key);
       batch.set(logRef, logs[key], { merge: true });
     });
-    await batch.commit();
+    batch.commit();
   }
 );
 
-exports.presenceCroller = onSchedule("0 * * * *", async (event) => {
-  const now = new Date();
-  const baseTime = 60 * 60 * 1000;
-  const query = database
-    .ref("presence")
-    .orderByChild("time")
-    .endAt(now - baseTime)
-    .limitToFirst(100);
-  const snapshot = await query.get();
+exports.presenceCroller = onSchedule(
+  {
+    schedule: "0 * * * *",
+    timeZone: timezone,
+    concurrency: 1,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const now = new Date();
+    const baseTime = 60 * 60 * 1000;
+    const query = database
+      .ref("presence")
+      .orderByChild("upddt")
+      .endAt(now - baseTime)
+      .limitToFirst(100);
+    const snapshot = await query.get();
 
-  if (!snapshot.exists()) return;
+    if (!snapshot.exists()) return;
 
-  console.log("delete presence num: ", snapshot.numChildren());
+    console.log("delete presence num: ", snapshot.numChildren());
 
-  let newData = {};
-  snapshot.forEach((child) => {
-    newData[child.key] = null;
-  });
+    let newData = {};
+    snapshot.forEach((child) => {
+      newData[child.key] = null;
+    });
 
-  database.ref("presence").update(newData);
-});
+    database.ref("presence").update(newData);
+  }
+);
 
-exports.requestCroller = onSchedule("30 * * * *", async (event) => {
-  const now = new Date();
-  const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
-  const query = firestore
-    .collection("requests")
-    .where("credt", "<", baseDate)
-    .limit(100);
-  const snapshot = await query.get();
+exports.requestCroller = onSchedule(
+  {
+    schedule: "30 * * * *",
+    timeZone: timezone,
+    concurrency: 1,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 60,
+  },
+  async (event) => {
+    const now = new Date();
+    const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
+    const query = firestore
+      .collection("requests")
+      .where("credt", "<", baseDate)
+      .limit(100);
+    const snapshot = await query.get();
 
-  if (snapshot.empty) return;
+    if (snapshot.empty) return;
 
-  console.log("delete requests num: ", snapshot.size);
+    console.log("delete requests num: ", snapshot.size);
 
-  const batch = firestore.batch();
-  snapshot.forEach((doc) => {
-    batch.delete(doc.ref);
-  });
-  await batch.commit();
-});
+    const batch = firestore.batch();
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    batch.commit();
+  }
+);
 
 exports.contactFunction = onDocumentCreated(
-  "contacts/{contactId}",
+  {
+    document: "contacts/{contactId}",
+    concurrency: 1,
+    cpu: 0.083,
+    memory: "128MiB",
+    timeoutSeconds: 10,
+  },
   async (event) => {
     const data = event.data.data();
 
@@ -337,3 +383,9 @@ function getDateKey(date) {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+// const { onRequest } = require("firebase-functions/v2/https");
+// exports.testFunction = onRequest(async (req, res) => {
+
+//   res.send("ok");
+// });

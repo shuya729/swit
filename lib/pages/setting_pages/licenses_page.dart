@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/layout.dart';
 import '../../providers/layout_providers.dart';
-import '../../widgets/setting_page_temp.dart';
+import '../../widgets/setting_state.dart';
+import '../../widgets/setting_widget.dart';
 import 'setting_sheet.dart';
 
 class LicensesPage extends ConsumerStatefulWidget {
@@ -14,7 +15,7 @@ class LicensesPage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _LicensesPageState();
 }
 
-class _LicensesPageState extends ConsumerState<LicensesPage> {
+class _LicensesPageState extends SettingState<LicensesPage> {
   Map<String, List<List<LicenseParagraph>>> packages = {};
   Map<List<String>, List<LicenseParagraph>> licenses = {};
 
@@ -43,46 +44,43 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  String get title => 'ライセンス情報';
+
+  @override
+  Widget buildChild(BuildContext context) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
 
     if (packages.isEmpty) {
-      return SettingPageTemp(
-        title: 'ライセンス情報',
-        child: Center(
-          child: SizedBox(
-            width: 30,
-            height: 30,
-            child: CircularProgressIndicator(
-              strokeWidth: 1,
-              color: layout.subText,
-              strokeCap: StrokeCap.round,
-            ),
+      return Center(
+        child: SizedBox(
+          width: 30,
+          height: 30,
+          child: CircularProgressIndicator(
+            strokeWidth: 1,
+            color: layout.subText,
+            strokeCap: StrokeCap.round,
           ),
         ),
       );
     }
 
-    return SettingPageTemp(
-      title: 'ライセンス情報',
-      child: ListView.builder(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom + 40,
-        ),
-        itemCount: packages.length,
-        itemBuilder: (context, index) {
-          final String package = packages.keys.toList()[index];
-          final List<List<LicenseParagraph>> paragraphs =
-              packages.values.toList()[index];
-
-          return SettingSheet.settingItem(
-            layout: layout,
-            menu: package,
-            onTap: () => SettingPageTemp.push(
-                context, LicenseChild(package, paragraphs)),
-          );
-        },
+    return ListView.builder(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 40,
       ),
+      itemCount: packages.length,
+      itemBuilder: (context, index) {
+        final String package = packages.keys.toList()[index];
+        final List<List<LicenseParagraph>> paragraphs =
+            packages.values.toList()[index];
+
+        return SettingSheet.settingItem(
+          layout: layout,
+          menu: package,
+          onTap: () =>
+              SettingWidget.push(context, LicenseChild(package, paragraphs)),
+        );
+      },
     );
   }
 }
@@ -95,7 +93,9 @@ class LicenseChild extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    return SettingPageTemp(
+    return SettingWidget.pageTemp(
+      context: context,
+      layout: layout,
       title: package,
       child: ListView.separated(
         itemCount: paragraphs.length,

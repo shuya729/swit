@@ -1,21 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/layout.dart';
-import '../providers/layout_providers.dart';
+import '../../models/layout.dart';
+import '../../models/user_data.dart';
+import '../../providers/friend_states.dart';
+import '../../providers/layout_providers.dart';
+import '../../widgets/user_tile.dart';
 
-class SettingPageTemp extends ConsumerWidget {
-  const SettingPageTemp({
-    super.key,
-    required this.title,
-    required this.child,
-    this.isRoot = false,
-    this.fromDialog = false,
-  });
-  final String title;
-  final Widget child;
-  final bool isRoot;
-  final bool fromDialog;
+abstract class SettingWidget extends ConsumerWidget {
+  const SettingWidget(this.myData, {super.key});
+  final UserData myData;
 
   static Future<void> push(BuildContext context, Widget next) async {
     Navigator.of(context).push(
@@ -28,10 +23,14 @@ class SettingPageTemp extends ConsumerWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-
+  static Widget pageTemp({
+    required BuildContext context,
+    required Layout layout,
+    required String title,
+    required Widget child,
+    bool isRoot = false,
+    bool fromDialog = false,
+  }) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.transparent,
@@ -102,61 +101,103 @@ class SettingPageTemp extends ConsumerWidget {
       ),
     );
   }
-}
 
-class SettingDialogTemp extends ConsumerWidget {
-  const SettingDialogTemp({
-    super.key,
-    required this.title,
-    this.description,
-    required this.child,
-  });
-  final String title;
-  final String? description;
-  final Widget child;
+  @protected
+  String get title;
+  @protected
+  String get noUserMsg;
+  @protected
+  String get tgtFriendState;
 
-  Future<void> show(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (context) => this,
+  Future<List<UserData>> getTgtUsers(Map<String, String> userStates) async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final List<UserData> tgtUsers = [];
+    final List<String> tgtIds = [];
+
+    userStates.forEach((String key, String value) {
+      if (value == tgtFriendState) tgtIds.add(key);
+    });
+    if (tgtIds.isEmpty) {
+      return tgtUsers;
+    }
+
+    await firestore
+        .collection('users')
+        .where('uid', whereIn: tgtIds)
+        .get()
+        .then(
+      (QuerySnapshot snapshot) {
+        tgtUsers.addAll(snapshot.docs.map<UserData>(
+          (DocumentSnapshot doc) {
+            return UserData.fromFirestore(doc);
+          },
+        ));
+      },
     );
+
+    return tgtUsers;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    return Dialog(
-      backgroundColor: layout.mainBack,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: SizedBox(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-          child: Column(
-            children: [
-              Text(
-                title,
+    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
+
+    return pageTemp(
+      context: context,
+      layout: layout,
+      title: title,
+      child: FutureBuilder(
+        future: getTgtUsers(friendStates),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            final List<UserData> users = snapshot.data!;
+            return ListView.builder(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 40,
+              ),
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final UserData user = users[index];
+                return UserTile(myData: myData, user: user);
+              },
+            );
+          } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                noUserMsg,
                 style: TextStyle(
                   fontWeight: FontWeight.w300,
-                  fontSize: 20,
                   color: layout.mainText,
+                  fontSize: 15,
                 ),
               ),
-              const SizedBox(height: 20),
-              description != null
-                  ? Text(
-                      description!,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 14,
-                        color: layout.mainText,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              const SizedBox(height: 20),
-              child,
-            ],
-          ),
-        ),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'エラーが発生しました。',
+                style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  color: layout.mainText,
+                  fontSize: 15,
+                ),
+              ),
+            );
+          } else {
+            return Center(
+              child: SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1,
+                  color: layout.subText,
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+            );
+          }
+        },
       ),
     );
   }

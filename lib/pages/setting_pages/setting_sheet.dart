@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/layout_providers.dart';
 import '../../providers/my_data_privder.dart';
 import '../../widgets/icon_widget.dart';
+import '../../widgets/setting_widget.dart';
 import 'bolocking_page.dart';
 import 'contact_page.dart';
 import 'delete_dialog.dart';
@@ -20,7 +21,6 @@ import 'name_page.dart';
 import 'requested_page.dart';
 import 'requesting_page.dart';
 import 'search_page.dart';
-import '../../widgets/setting_page_temp.dart';
 import 'signin_dialog.dart';
 import 'signout_dialog.dart';
 import 'terms_page.dart';
@@ -118,7 +118,7 @@ class SettingSheet extends ConsumerWidget {
           height: 80,
           alignment: Alignment.topCenter,
           child: GestureDetector(
-              onTap: () => SettingPageTemp.push(context, IconPage(myData)),
+              onTap: () => SettingWidget.push(context, IconPage(myData)),
               child: IconWidget(myData.image, radius: 35)),
         ),
         Row(
@@ -158,7 +158,7 @@ class SettingSheet extends ConsumerWidget {
         settingItem(
           menu: myData.name.isEmpty ? '名前' : myData.name,
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, NamePage(myData)),
+          onTap: () => SettingWidget.push(context, NamePage(myData)),
         ),
         settingItem(
           menu: 'サインアウト',
@@ -175,27 +175,27 @@ class SettingSheet extends ConsumerWidget {
         settingItem(
           menu: 'フレンド一覧',
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, FriendsPage(myData)),
+          onTap: () => SettingWidget.push(context, FriendsPage(myData)),
         ),
         settingItem(
           menu: 'フレンド追加',
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, SearchPage(myData)),
+          onTap: () => SettingWidget.push(context, SearchPage(myData)),
         ),
         settingItem(
           menu: '送信リクエスト',
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, RequestingPage(myData)),
+          onTap: () => SettingWidget.push(context, RequestingPage(myData)),
         ),
         settingItem(
           menu: '受信リクエスト',
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, RequestedPage(myData)),
+          onTap: () => SettingWidget.push(context, RequestedPage(myData)),
         ),
         settingItem(
           menu: 'ブロックリスト',
           layout: layout,
-          onTap: () => SettingPageTemp.push(context, BlockingPage(myData)),
+          onTap: () => SettingWidget.push(context, BlockingPage(myData)),
         ),
       ];
     }
@@ -204,22 +204,22 @@ class SettingSheet extends ConsumerWidget {
       settingItem(
         menu: '利用規約',
         layout: layout,
-        onTap: () => SettingPageTemp.push(context, const TermsPage(false)),
+        onTap: () => SettingWidget.push(context, const TermsPage(false)),
       ),
       settingItem(
         menu: 'プライバシーポリシー',
         layout: layout,
-        onTap: () => SettingPageTemp.push(context, const TermsPage(true)),
+        onTap: () => SettingWidget.push(context, const TermsPage(true)),
       ),
       settingItem(
         menu: 'ライセンス情報',
         layout: layout,
-        onTap: () => SettingPageTemp.push(context, const LicensesPage()),
+        onTap: () => SettingWidget.push(context, const LicensesPage()),
       ),
       settingItem(
         menu: 'お問い合わせ',
         layout: layout,
-        onTap: () => SettingPageTemp.push(context, ContactPage(user, myData)),
+        onTap: () => SettingWidget.push(context, ContactPage(user, myData)),
       ),
     ];
 
@@ -242,7 +242,9 @@ class SettingSheet extends ConsumerWidget {
         const SizedBox(height: 15),
       ]);
     });
-    return SettingPageTemp(
+    return SettingWidget.pageTemp(
+      context: context,
+      layout: layout,
       title: '設定',
       isRoot: true,
       child: ListView(
