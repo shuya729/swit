@@ -36,6 +36,12 @@ class _IconPageState extends SettingState<IconPage> {
         cropStyle: CropStyle.circle,
         compressFormat: ImageCompressFormat.jpg,
         compressQuality: 0,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: '画像を編集',
+            hideBottomControls: true,
+          ),
+        ],
       );
       if (croppedImage == null) return;
       setState(() => _imageFile = File(croppedImage.path));
