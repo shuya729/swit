@@ -18,16 +18,20 @@ class _MyDataNotifier extends StateNotifier<UserData?> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> _init() async {
-    if (_user == null) return;
-    final Stream<DocumentSnapshot> stream =
-        _firestore.collection('users').doc(_user.uid).snapshots();
-    await for (DocumentSnapshot doc in stream) {
-      if (doc.exists) {
-        print('bgndt: ${UserData.fromFirestore(doc).bgndt}');
-        if (mounted) state = UserData.fromFirestore(doc);
-      } else {
-        if (mounted) state = null;
+    try {
+      if (_user == null) return;
+      final Stream<DocumentSnapshot> stream =
+          _firestore.collection('users').doc(_user.uid).snapshots();
+      await for (DocumentSnapshot doc in stream) {
+        if (doc.exists) {
+          print('bgndt: ${UserData.fromFirestore(doc).bgndt}');
+          if (mounted) state = UserData.fromFirestore(doc);
+        } else {
+          if (mounted) state = null;
+        }
       }
+    } catch (e) {
+      if (mounted) state = null;
     }
   }
 }

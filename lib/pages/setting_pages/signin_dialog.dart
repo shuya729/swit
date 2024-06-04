@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
 import '../../models/layout.dart';
+import '../../models/messaging.dart';
 import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
 
@@ -23,6 +24,7 @@ class SigninDialog extends SettingDialog {
         idToken: googleAuth.idToken,
       );
       await auth.signInWithCredential(credential);
+      await Messaging().init();
     } catch (e) {
       showMsgbar('サインインに失敗しました。');
     }
@@ -35,6 +37,7 @@ class SigninDialog extends SettingDialog {
       appleProvider.addScope('email');
       appleProvider.addScope('name');
       await auth.signInWithProvider(appleProvider);
+      await Messaging().init();
     } catch (e) {
       showMsgbar('サインインに失敗しました。');
     }

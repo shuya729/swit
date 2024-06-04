@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/layout.dart';
+import '../../models/messaging.dart';
 import '../../models/presence.dart';
 import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
@@ -15,6 +16,7 @@ class SignoutDialog extends SettingDialog {
       final FirebaseAuth auth = FirebaseAuth.instance;
       final Presence presence = Presence.instance;
       await presence.paused();
+      await Messaging().deleteToken();
       await auth.signOut();
     } catch (e) {
       showMsgbar('サインアウトに失敗しました。');

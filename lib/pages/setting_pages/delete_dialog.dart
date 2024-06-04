@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../models/layout.dart';
+import '../../models/messaging.dart';
 import '../../models/presence.dart';
 import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
@@ -45,6 +46,7 @@ class DeleteDialog extends SettingDialog {
       } else {}
       if (reauthUser == null) return;
       await presence.paused();
+      await Messaging().deleteToken();
       await user.delete();
     } catch (e) {
       showMsgbar('アカウントの削除に失敗しました。');

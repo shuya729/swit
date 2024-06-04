@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/layout.dart';
 import '../../providers/layout_providers.dart';
+import '../../widgets/setting_item.dart';
 import '../../widgets/setting_state.dart';
 import '../../widgets/setting_widget.dart';
-import 'setting_sheet.dart';
 
 class LicensesPage extends ConsumerStatefulWidget {
   const LicensesPage({super.key});
@@ -74,8 +74,7 @@ class _LicensesPageState extends SettingState<LicensesPage> {
         final List<List<LicenseParagraph>> paragraphs =
             packages.values.toList()[index];
 
-        return SettingSheetState.settingItem(
-          layout: layout,
+        return SettingItem(
           menu: package,
           onTap: () =>
               SettingState.push(context, LicenseChild(package, paragraphs)),

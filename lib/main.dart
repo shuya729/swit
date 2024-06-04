@@ -15,6 +15,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'models/config.dart';
 import 'models/layout.dart';
+import 'models/messaging.dart';
 import 'models/presence.dart';
 import 'pages/home_page.dart';
 import 'pages/layout_page.dart';
@@ -187,6 +188,7 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    Messaging().init();
     _pageController = PageController(initialPage: 1);
     _pageController.addListener(() {
       final double width = MediaQuery.of(context).size.width;

@@ -73,6 +73,9 @@ exports.deleteFunction = user().onDelete(async (user) => {
   const friendsRef = firestore.collection("friends").doc(user.uid);
   batch.delete(friendsRef);
 
+  const tokenRef = firestore.collection("tokens").doc(user.uid);
+  batch.delete(tokenRef);
+
   await batch.commit();
 
   const iconImage = storage.bucket().file(`users/${user.uid}/iconImage.jpg`);
@@ -386,6 +389,5 @@ function getDateKey(date) {
 
 // const { onRequest } = require("firebase-functions/v2/https");
 // exports.testFunction = onRequest(async (req, res) => {
-
 //   res.send("ok");
 // });

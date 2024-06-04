@@ -1,15 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/data_state.dart';
+import '../../models/friend_state.dart';
 import '../../models/layout.dart';
 import '../../models/user_data.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/friend_states.dart';
 import '../../providers/layout_providers.dart';
 import '../../providers/my_data_privder.dart';
 import '../../widgets/icon_widget.dart';
+import '../../widgets/setting_item.dart';
 import '../../widgets/setting_state.dart';
 import 'bolocking_page.dart';
 import 'contact_page.dart';
@@ -33,36 +37,31 @@ class SettingSheet extends ConsumerStatefulWidget {
 }
 
 class SettingSheetState extends SettingState<SettingSheet> {
-  static Widget settingItem({
-    required String menu,
-    required Layout layout,
-    required Function()? onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              menu,
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 15,
-                color: onTap == null ? layout.subText : layout.mainText,
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 15,
-              color: layout.subText,
-            ),
-          ],
-        ),
-      ),
-    );
+  Future<int> _countingUsers(
+    Map<String, String> friendStates,
+    String tgtState,
+  ) async {
+    final List<String> tgtIds = [];
+    if (tgtState == FriendState.friend) {
+      friendStates.forEach((String key, String value) {
+        if (value == FriendState.friend) tgtIds.add(key);
+      });
+      friendStates.forEach((String key, String value) {
+        if (value == FriendState.blocked) tgtIds.add(key);
+      });
+    } else {
+      friendStates.forEach((String key, String value) {
+        if (value == tgtState) tgtIds.add(key);
+      });
+    }
+    if (tgtIds.isEmpty) return 0;
+
+    final res = await FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', whereIn: tgtIds)
+        .count()
+        .get();
+    return res.count ?? 0;
   }
 
   Map<String, List<Widget>> _getSettingMenus({
@@ -70,6 +69,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
     required Layout layout,
     required UserData? myData,
     required User? user,
+    required Map<String, String> friendStates,
     required DataState dataState,
   }) {
     final Map<String, List<Widget>> settingMenus = {};
@@ -89,30 +89,26 @@ class SettingSheetState extends SettingState<SettingSheet> {
             ),
           ),
         ),
-        settingItem(
+        SettingItem(
           menu: 'サインアウト',
-          layout: layout,
           onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
-        settingItem(
+        SettingItem(
           menu: 'アカウント削除',
-          layout: layout,
           onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
     } else if (dataState.hasError) {
       settingMenus['アカウント'] = [
-        settingItem(
+        SettingItem(
           menu: 'エラー: ${dataState.errorMessage}',
-          layout: layout,
           onTap: null,
         ),
       ];
     } else if (myData == null) {
       settingMenus['アカウント'] = [
-        settingItem(
+        SettingItem(
           menu: 'サインイン',
-          layout: layout,
           onTap: () => SigninDialog(showMsgbar).show(context),
         ),
       ];
@@ -160,70 +156,62 @@ class SettingSheetState extends SettingState<SettingSheet> {
           ],
         ),
         const SizedBox(height: 10),
-        settingItem(
+        SettingItem(
           menu: myData.name.isEmpty ? '名前' : myData.name,
-          layout: layout,
           onTap: () => SettingState.push(context, NamePage(myData)),
         ),
-        settingItem(
+        SettingItem(
           menu: 'サインアウト',
-          layout: layout,
           onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
-        settingItem(
+        SettingItem(
           menu: 'アカウント削除',
-          layout: layout,
           onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
       settingMenus['フレンド'] = [
-        settingItem(
-          menu: 'フレンド一覧',
-          layout: layout,
-          onTap: () => SettingState.push(context, FriendsPage(myData)),
-        ),
-        settingItem(
+        SettingItem(
           menu: 'フレンド追加',
-          layout: layout,
           onTap: () => SettingState.push(context, SearchPage(myData)),
         ),
-        settingItem(
+        SettingItem(
+          menu: 'フレンド一覧',
+          onTap: () => SettingState.push(context, FriendsPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.friend),
+        ),
+        SettingItem(
           menu: '送信リクエスト',
-          layout: layout,
           onTap: () => SettingState.push(context, RequestingPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.requesting),
         ),
-        settingItem(
+        SettingItem(
           menu: '受信リクエスト',
-          layout: layout,
           onTap: () => SettingState.push(context, RequestedPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.requested),
         ),
-        settingItem(
+        SettingItem(
           menu: 'ブロックリスト',
-          layout: layout,
           onTap: () => SettingState.push(context, BlockingPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.blocking),
         ),
       ];
     }
 
     settingMenus['このアプリについて'] = [
-      settingItem(
+      SettingItem(
         menu: '利用規約',
-        layout: layout,
         onTap: () => SettingState.push(context, const TermsPage(false)),
       ),
-      settingItem(
+      SettingItem(
         menu: 'プライバシーポリシー',
-        layout: layout,
         onTap: () => SettingState.push(context, const TermsPage(true)),
       ),
-      settingItem(
+      SettingItem(
         menu: 'ライセンス情報',
-        layout: layout,
         onTap: () => SettingState.push(context, const LicensesPage()),
       ),
-      settingItem(
+      SettingItem(
         menu: 'お問い合わせ',
-        layout: layout,
         onTap: () => SettingState.push(context, ContactPage(user, myData)),
       ),
     ];
@@ -241,6 +229,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final User? user = ref.watch(authProvider);
     final UserData? myData = ref.watch(myDataProvider);
+    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
     final List<Widget> children = [];
     late final Map<String, List<Widget>> settingMenus;
 
@@ -250,6 +239,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         layout: layout,
         myData: null,
         user: null,
+        friendStates: friendStates,
         dataState: DataState.normal(),
       );
     } else if (myData == null) {
@@ -258,6 +248,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         layout: layout,
         myData: null,
         user: user,
+        friendStates: friendStates,
         dataState: DataState.loading(),
       );
     } else {
@@ -266,6 +257,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         layout: layout,
         myData: myData,
         user: user,
+        friendStates: friendStates,
         dataState: DataState.normal(),
       );
     }
