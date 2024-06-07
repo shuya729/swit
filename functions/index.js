@@ -1,13 +1,19 @@
 const https = require("https");
 const { initializeApp } = require("firebase-admin/app");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const {
+  getFirestore,
+  FieldValue,
+  Timestamp,
+} = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
 const { getDatabase } = require("firebase-admin/database");
+const { getMessaging } = require("firebase-admin/messaging");
 const { user } = require("firebase-functions/v1/auth");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const {
   onValueCreated,
+  onValueUpdated,
   onValueDeleted,
 } = require("firebase-functions/v2/database");
 
@@ -110,12 +116,22 @@ exports.requestFunction = onDocumentCreated(
       const tgtFriendDoc = await t.get(tgtFriendRef);
 
       if (request === "friend") {
-        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "requesting") {
+        if (
+          tgtFriendDoc.exists &&
+          (tgtFriendDoc.data()[uid] === "friend" ||
+            tgtFriendDoc.data()[uid] === "requested")
+        ) {
+        } else if (
+          tgtFriendDoc.exists &&
+          tgtFriendDoc.data()[uid] === "requesting"
+        ) {
           t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+          await messaging(uid, [tgt], "friend");
         } else {
           t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
+          await messaging(uid, [tgt], "request");
         }
       } else if (request === "unfriend") {
         t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
@@ -175,6 +191,34 @@ exports.presenceFunction = onValueCreated(
     if (mindt !== bgn.getTime()) return;
 
     userRef.update({ bgndt: bgn, upddt: now });
+  }
+);
+
+exports.studyingFunction = onValueUpdated(
+  {
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    ref: "/presence/{presenceId}",
+    timeoutSeconds: 10,
+  },
+  async (event) => {
+    const uid = event.data.after.val().uid;
+    const credt = event.data.after.val().credt;
+    const upddt = event.data.after.val().upddt;
+    const hour = 60 * 60 * 1000;
+
+    if (upddt > credt + hour) return;
+
+    const snapshot = await firestore.collection("friends").doc(uid).get();
+    if (!snapshot.exists) return;
+
+    const tgts = Object.keys(snapshot.data()).filter(
+      (key) => snapshot.data()[key] === "friend"
+    );
+    if (tgts.length === 0) return;
+
+    await messaging(uid, tgts, "studing");
   }
 );
 
@@ -385,6 +429,96 @@ function getDateKey(date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+async function messaging(uid, tgts, type) {
+  const now = new Date().getTime();
+  const baseTime = 30 * 24 * 60 * 60 * 1000;
+  const tokens = [];
+  const failed = [];
+
+  if (!Array.isArray(tgts)) return;
+  const snapshot = await firestore
+    .collection("tokens")
+    .where("uid", "in", tgts)
+    .get();
+  if (snapshot.empty) return;
+
+  snapshot.forEach((doc) => {
+    Object.keys(doc.data()).forEach((key) => {
+      if (key === "uid") return;
+      const val = doc.data()[key];
+      if (val instanceof Timestamp && val.toMillis() > now - baseTime) {
+        tokens.push(key);
+      } else {
+        failed.push(key);
+      }
+    });
+  });
+
+  if (tokens.length > 0) {
+    const userDoc = await firestore.collection("users").doc(uid).get();
+    if (!userDoc.exists) return;
+    const userName = userDoc.data().name;
+
+    let title = "";
+    let body = "";
+    if (type === "request") {
+      title = "フレンドリクエスト";
+      body = `${userName} からフレンドリクエストが届いています`;
+    } else if (type === "friend") {
+      title = "リクエスト承認";
+      body = `${userName} とフレンドになりました`;
+    } else if (type === "studing") {
+      title = "SWiT Study";
+      body = `${userName} がSWiTで勉強しています`;
+    }
+    if (title === "" || body === "") return;
+
+    const message = {
+      tokens: tokens,
+      notification: {
+        title: title,
+        body: body,
+      },
+      android: {
+        notification: {
+          sound: "default",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: "default",
+          },
+        },
+      },
+    };
+    const ret = await getMessaging().sendEachForMulticast(message);
+
+    if (ret.failureCount > 0) {
+      ret.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          failed.push(message.tokens[idx]);
+        }
+      });
+    }
+  }
+  if (failed.length === 0) return;
+
+  const batch = firestore.batch();
+  snapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    const tgtTokens = failed.filter((key) => data[key]);
+    if (tgtTokens.length === 0) return;
+    const tgtTokenRef = firestore.collection("tokens").doc(data.uid);
+    const tgtData = {};
+    tgtTokens.forEach((key) => {
+      tgtData[key] = FieldValue.delete();
+    });
+    batch.update(tgtTokenRef, tgtData);
+  });
+  await batch.commit();
 }
 
 // const { onRequest } = require("firebase-functions/v2/https");

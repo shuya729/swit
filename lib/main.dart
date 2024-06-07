@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
     final Layout layout = Layout.def;
     return MaterialApp(
       // debugShowCheckedModeBanner: false, // サンプル用
+      theme: ThemeData(primarySwatch: Colors.teal),
       home: FutureBuilder(
         future: _futureConfig(),
         builder: (context, snapshot) {

@@ -126,15 +126,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'フレンドキー： ',
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 13,
-                color: layout.mainText,
-              ),
-            ),
-            SelectableText(
-              myData.uid,
+              'フレンドキー： ${myData.uid}',
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontSize: 13,
