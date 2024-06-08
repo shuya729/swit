@@ -192,9 +192,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: layout.image != null
-            ? null
-            : Border.all(width: 0, color: layout.mainText),
+        border: Border.all(width: 0, color: layout.mainText),
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -218,7 +216,7 @@ class FriendsWidget extends ConsumerWidget {
             : Border.all(width: 0, color: layout.mainText),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: child,
       ),
     );
