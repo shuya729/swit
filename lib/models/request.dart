@@ -19,7 +19,7 @@ class Request {
       'uid': uid,
       'tgt': tgt,
       'request': request,
-      'credt': DateTime.now(),
+      'credt': FieldValue.serverTimestamp(),
     });
   }
 

@@ -32,7 +32,7 @@
      inkscape:window-width="1280"
      inkscape:window-height="886"
      inkscape:window-x="23"
-     inkscape:window-y="25"
+     inkscape:window-y="38"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1" />
   <defs
@@ -48,22 +48,10 @@
        height="120"
        x="-10"
        y="-10" />
-    <rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:7.9375e-09;paint-order:fill markers stroke"
+    <path
        id="rect2"
-       width="70"
-       height="30"
-       x="15"
-       y="35"
-       ry="6.4982667" />
-    <rect
-       style="fill:#66c0b7;fill-opacity:1;stroke-width:0.0000000079375;paint-order:fill markers stroke"
-       id="rect3"
-       height="28"
-       x="15.999999"
-       y="36"
-       width="68"
-       ry="5.6782846" />
+       style="fill:#ffffff;fill-opacity:1;stroke-width:7.9375e-09;paint-order:fill markers stroke"
+       d="M 21.498429 34.999931 C 17.898393 34.999931 15.000118 37.898206 15.000118 41.498242 L 15.000118 58.501855 C 15.000118 62.101892 17.898393 65.000167 21.498429 65.000167 L 78.501668 65.000167 C 82.101704 65.000167 84.99998 62.101892 84.99998 58.501855 L 84.99998 41.498242 C 84.99998 37.898206 82.101704 34.999931 78.501668 34.999931 L 21.498429 34.999931 z M 21.678263 35.99987 L 78.321834 35.99987 C 81.467601 35.99987 84.000041 38.53231 84.000041 41.678076 L 84.000041 58.321505 C 84.000041 61.467271 81.467601 64.000228 78.321834 64.000228 L 21.678263 64.000228 C 18.532497 64.000228 16.000057 61.467271 16.000057 58.321505 L 16.000057 41.678076 C 16.000057 38.53231 18.532497 35.99987 21.678263 35.99987 z " />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:22.6033px;font-family:Avenir;-inkscape-font-specification:'Avenir, Light';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;fill-opacity:1;stroke-width:7.93751e-09;paint-order:fill markers stroke"

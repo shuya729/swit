@@ -6,13 +6,13 @@ import '../models/request.dart';
 import 'auth_provider.dart';
 
 final requestsProvider =
-    StateNotifierProvider<RequestsNotifier, List<Request>>((ref) {
+    StateNotifierProvider<_RequestsNotifier, List<Request>>((ref) {
   final User? auth = ref.watch(authProvider);
-  return RequestsNotifier(auth);
+  return _RequestsNotifier(auth);
 });
 
-class RequestsNotifier extends StateNotifier<List<Request>> {
-  RequestsNotifier(this._user) : super([]) {
+class _RequestsNotifier extends StateNotifier<List<Request>> {
+  _RequestsNotifier(this._user) : super([]) {
     _init();
   }
   final User? _user;

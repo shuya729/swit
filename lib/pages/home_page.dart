@@ -11,6 +11,7 @@ import '../models/presence.dart';
 import '../models/user_data.dart';
 import '../providers/friends_provider.dart';
 import '../providers/layout_providers.dart';
+import '../providers/my_data_privder.dart';
 import '../widgets/icon_widget.dart';
 
 class HomePage extends StatelessWidget {
@@ -191,9 +192,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: layout.image != null
-            ? null
-            : Border.all(width: 0, color: layout.mainText),
+        border: Border.all(width: 0, color: layout.mainText),
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -217,7 +216,7 @@ class FriendsWidget extends ConsumerWidget {
             : Border.all(width: 0, color: layout.mainText),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: child,
       ),
     );
@@ -227,6 +226,7 @@ class FriendsWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final Presence presence = Presence.instance;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+    final UserData? myData = ref.watch(myDataProvider);
     final List<UserData> friends = ref.watch(friendsProvider);
     final List<UserData> activeFriends =
         friends.where((friend) => friend.bgndt != null).toList();
@@ -235,9 +235,11 @@ class FriendsWidget extends ConsumerWidget {
       initialData: presence.connected,
       stream: presence.connectedStream,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data == false) {
+        final bool connected = snapshot.data ?? false;
+        final bool completed = myData == null || myData.bgndt != null;
+        if (connected == false || completed == false) {
           return FutureBuilder(
-            future: Future.delayed(const Duration(seconds: 10)),
+            future: Future.delayed(const Duration(seconds: 60)),
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return _friendsBack(
@@ -267,7 +269,9 @@ class FriendsWidget extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "インターネット接続がありません",
+                          connected == false
+                              ? "インターネット接続がありません"
+                              : "接続状況が正しく処理されませんでした",
                           style: TextStyle(
                             fontWeight: FontWeight.w300,
                             fontSize: 13,
@@ -275,7 +279,9 @@ class FriendsWidget extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          "ログの記録やフレンドへの表示が行われません",
+                          connected == false
+                              ? "ログの記録やフレンドへの表示が行われません"
+                              : "アプリを再起動してください",
                           style: TextStyle(
                             fontWeight: FontWeight.w300,
                             fontSize: 13,

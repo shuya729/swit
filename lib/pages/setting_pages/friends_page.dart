@@ -46,6 +46,18 @@ class FriendsPage extends SettingWidget {
       },
     );
 
+    friends.sort((UserData a, UserData b) {
+      final String astate = userStates[a.uid] ?? FriendState.friend;
+      final String bstate = userStates[b.uid] ?? FriendState.friend;
+      if (astate == bstate) {
+        return 0;
+      } else if (astate == FriendState.friend) {
+        return -1;
+      } else {
+        return 1;
+      }
+    });
+
     return friends;
   }
 }

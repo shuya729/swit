@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,13 +17,14 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'models/config.dart';
 import 'models/layout.dart';
+import 'models/messaging.dart';
 import 'models/presence.dart';
 import 'pages/home_page.dart';
 import 'pages/layout_page.dart';
 import 'pages/logs_page.dart';
 import 'pages/setting_pages/terms_page.dart';
 import 'providers/layout_providers.dart';
-import 'widgets/setting_widget.dart';
+import 'widgets/setting_state.dart';
 
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +62,7 @@ class MyApp extends StatelessWidget {
     final Layout layout = Layout.def;
     return MaterialApp(
       // debugShowCheckedModeBanner: false, // サンプル用
+      theme: ThemeData(primarySwatch: Colors.teal),
       home: FutureBuilder(
         future: _futureConfig(),
         builder: (context, snapshot) {
@@ -180,13 +184,16 @@ class Main extends ConsumerStatefulWidget {
 }
 
 class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
-  final Presence _presence = Presence.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
   late final PageController _pageController;
   double _opacity = 1.0;
 
   @override
   void initState() {
     super.initState();
+    Presence.instance;
+    Messaging().init();
     _pageController = PageController(initialPage: 1);
     _pageController.addListener(() {
       final double width = MediaQuery.of(context).size.width;
@@ -207,10 +214,11 @@ class _MainState extends ConsumerState<Main> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    if (_auth.currentUser == null) return;
     if (state == AppLifecycleState.resumed) {
-      _presence.resumed();
+      _database.goOnline();
     } else if (state == AppLifecycleState.paused) {
-      _presence.paused();
+      _database.goOffline();
     }
   }
 
@@ -347,7 +355,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingWidget.push(
+                            onPressed: () => SettingState.push(
                               context,
                               _termsPage(layout, false),
                             ),
@@ -390,7 +398,7 @@ class _TermsDialogState extends ConsumerState<TermsDialog> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () => SettingWidget.push(
+                            onPressed: () => SettingState.push(
                               context,
                               _termsPage(layout, true),
                             ),

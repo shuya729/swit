@@ -92,6 +92,7 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                           IconButton(
                             onPressed: () {
                               showModalBottomSheet(
+                                useSafeArea: true,
                                 isScrollControlled: true,
                                 context: context,
                                 builder: (context) => Navigator(

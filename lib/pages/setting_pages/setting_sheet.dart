@@ -1,16 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/data_state.dart';
+import '../../models/friend_state.dart';
 import '../../models/layout.dart';
 import '../../models/user_data.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/friend_states.dart';
 import '../../providers/layout_providers.dart';
 import '../../providers/my_data_privder.dart';
 import '../../widgets/icon_widget.dart';
-import '../../widgets/setting_widget.dart';
+import '../../widgets/setting_item.dart';
+import '../../widgets/setting_state.dart';
 import 'bolocking_page.dart';
 import 'contact_page.dart';
 import 'delete_dialog.dart';
@@ -25,39 +29,39 @@ import 'signin_dialog.dart';
 import 'signout_dialog.dart';
 import 'terms_page.dart';
 
-class SettingSheet extends ConsumerWidget {
+class SettingSheet extends ConsumerStatefulWidget {
   const SettingSheet({super.key});
 
-  static Widget settingItem({
-    required String menu,
-    required Layout layout,
-    required Function()? onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              menu,
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 15,
-                color: onTap == null ? layout.subText : layout.mainText,
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 15,
-              color: layout.subText,
-            ),
-          ],
-        ),
-      ),
-    );
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => SettingSheetState();
+}
+
+class SettingSheetState extends SettingState<SettingSheet> {
+  Future<int> _countingUsers(
+    Map<String, String> friendStates,
+    String tgtState,
+  ) async {
+    final List<String> tgtIds = [];
+    if (tgtState == FriendState.friend) {
+      friendStates.forEach((String key, String value) {
+        if (value == FriendState.friend) tgtIds.add(key);
+      });
+      friendStates.forEach((String key, String value) {
+        if (value == FriendState.blocked) tgtIds.add(key);
+      });
+    } else {
+      friendStates.forEach((String key, String value) {
+        if (value == tgtState) tgtIds.add(key);
+      });
+    }
+    if (tgtIds.isEmpty) return 0;
+
+    final res = await FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', whereIn: tgtIds)
+        .count()
+        .get();
+    return res.count ?? 0;
   }
 
   Map<String, List<Widget>> _getSettingMenus({
@@ -65,6 +69,7 @@ class SettingSheet extends ConsumerWidget {
     required Layout layout,
     required UserData? myData,
     required User? user,
+    required Map<String, String> friendStates,
     required DataState dataState,
   }) {
     final Map<String, List<Widget>> settingMenus = {};
@@ -84,31 +89,27 @@ class SettingSheet extends ConsumerWidget {
             ),
           ),
         ),
-        settingItem(
+        SettingItem(
           menu: 'サインアウト',
-          layout: layout,
-          onTap: () => const SignoutDialog().show(context),
+          onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
-        settingItem(
+        SettingItem(
           menu: 'アカウント削除',
-          layout: layout,
-          onTap: () => DeleteDialog(user!).show(context),
+          onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
     } else if (dataState.hasError) {
       settingMenus['アカウント'] = [
-        settingItem(
+        SettingItem(
           menu: 'エラー: ${dataState.errorMessage}',
-          layout: layout,
           onTap: null,
         ),
       ];
     } else if (myData == null) {
       settingMenus['アカウント'] = [
-        settingItem(
+        SettingItem(
           menu: 'サインイン',
-          layout: layout,
-          onTap: () => const SigninDialog().show(context),
+          onTap: () => SigninDialog(showMsgbar).show(context),
         ),
       ];
     } else {
@@ -118,22 +119,14 @@ class SettingSheet extends ConsumerWidget {
           height: 80,
           alignment: Alignment.topCenter,
           child: GestureDetector(
-              onTap: () => SettingWidget.push(context, IconPage(myData)),
+              onTap: () => SettingState.push(context, IconPage(myData)),
               child: IconWidget(myData.image, radius: 35)),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'フレンドキー： ',
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontSize: 13,
-                color: layout.mainText,
-              ),
-            ),
-            SelectableText(
-              myData.uid,
+              'フレンドキー： ${myData.uid}',
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontSize: 13,
@@ -155,140 +148,134 @@ class SettingSheet extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 10),
-        settingItem(
+        SettingItem(
           menu: myData.name.isEmpty ? '名前' : myData.name,
-          layout: layout,
-          onTap: () => SettingWidget.push(context, NamePage(myData)),
+          onTap: () => SettingState.push(context, NamePage(myData)),
         ),
-        settingItem(
+        SettingItem(
           menu: 'サインアウト',
-          layout: layout,
-          onTap: () => const SignoutDialog().show(context),
+          onTap: () => SignoutDialog(showMsgbar).show(context),
         ),
-        settingItem(
+        SettingItem(
           menu: 'アカウント削除',
-          layout: layout,
-          onTap: () => DeleteDialog(user!).show(context),
+          onTap: () => DeleteDialog(user!, showMsgbar).show(context),
         ),
       ];
       settingMenus['フレンド'] = [
-        settingItem(
-          menu: 'フレンド一覧',
-          layout: layout,
-          onTap: () => SettingWidget.push(context, FriendsPage(myData)),
-        ),
-        settingItem(
+        SettingItem(
           menu: 'フレンド追加',
-          layout: layout,
-          onTap: () => SettingWidget.push(context, SearchPage(myData)),
+          onTap: () => SettingState.push(context, SearchPage(myData)),
         ),
-        settingItem(
+        SettingItem(
+          menu: 'フレンド一覧',
+          onTap: () => SettingState.push(context, FriendsPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.friend),
+        ),
+        SettingItem(
           menu: '送信リクエスト',
-          layout: layout,
-          onTap: () => SettingWidget.push(context, RequestingPage(myData)),
+          onTap: () => SettingState.push(context, RequestingPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.requesting),
         ),
-        settingItem(
+        SettingItem(
           menu: '受信リクエスト',
-          layout: layout,
-          onTap: () => SettingWidget.push(context, RequestedPage(myData)),
+          onTap: () => SettingState.push(context, RequestedPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.requested),
         ),
-        settingItem(
+        SettingItem(
           menu: 'ブロックリスト',
-          layout: layout,
-          onTap: () => SettingWidget.push(context, BlockingPage(myData)),
+          onTap: () => SettingState.push(context, BlockingPage(myData)),
+          counting: _countingUsers(friendStates, FriendState.blocking),
         ),
       ];
     }
 
     settingMenus['このアプリについて'] = [
-      settingItem(
+      SettingItem(
         menu: '利用規約',
-        layout: layout,
-        onTap: () => SettingWidget.push(context, const TermsPage(false)),
+        onTap: () => SettingState.push(context, const TermsPage(false)),
       ),
-      settingItem(
+      SettingItem(
         menu: 'プライバシーポリシー',
-        layout: layout,
-        onTap: () => SettingWidget.push(context, const TermsPage(true)),
+        onTap: () => SettingState.push(context, const TermsPage(true)),
       ),
-      settingItem(
+      SettingItem(
         menu: 'ライセンス情報',
-        layout: layout,
-        onTap: () => SettingWidget.push(context, const LicensesPage()),
+        onTap: () => SettingState.push(context, const LicensesPage()),
       ),
-      settingItem(
+      SettingItem(
         menu: 'お問い合わせ',
-        layout: layout,
-        onTap: () => SettingWidget.push(context, ContactPage(user, myData)),
+        onTap: () => SettingState.push(context, ContactPage(user, myData)),
       ),
     ];
 
     return settingMenus;
   }
 
-  Widget _settingWidget(BuildContext context, Layout layout,
-      Map<String, List<Widget>> settingMenus) {
+  @override
+  String get title => '設定';
+  @override
+  bool get isRoot => true;
+
+  @override
+  Widget buildChild(BuildContext context) {
+    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+    final User? user = ref.watch(authProvider);
+    final UserData? myData = ref.watch(myDataProvider);
+    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
     final List<Widget> children = [];
+    late final Map<String, List<Widget>> settingMenus;
+
+    if (user == null) {
+      settingMenus = _getSettingMenus(
+        context: context,
+        layout: layout,
+        myData: null,
+        user: null,
+        friendStates: friendStates,
+        dataState: DataState.normal(),
+      );
+    } else if (myData == null) {
+      settingMenus = _getSettingMenus(
+        context: context,
+        layout: layout,
+        myData: null,
+        user: user,
+        friendStates: friendStates,
+        dataState: DataState.loading(),
+      );
+    } else {
+      settingMenus = _getSettingMenus(
+        context: context,
+        layout: layout,
+        myData: myData,
+        user: user,
+        friendStates: friendStates,
+        dataState: DataState.normal(),
+      );
+    }
+
     settingMenus.forEach((key, value) {
       children.addAll([
         const SizedBox(height: 15),
         Text(
           key,
           style: TextStyle(
-              fontWeight: FontWeight.w300, fontSize: 16, color: layout.subText),
+            fontWeight: FontWeight.w300,
+            fontSize: 16,
+            color: layout.subText,
+          ),
         ),
         const SizedBox(height: 5),
         ...value,
         const SizedBox(height: 15),
       ]);
     });
-    return SettingWidget.pageTemp(
-      context: context,
-      layout: layout,
-      title: '設定',
-      isRoot: true,
-      child: ListView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom + 40,
-        ),
-        children: children,
+
+    return ListView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 40,
       ),
+      children: children,
     );
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    final User? user = ref.watch(authProvider);
-    final UserData? myData = ref.watch(myDataProvider);
-
-    if (user == null) {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
-        context: context,
-        layout: layout,
-        myData: null,
-        user: null,
-        dataState: DataState.normal(),
-      );
-      return _settingWidget(context, layout, settingMenus);
-    } else if (myData == null) {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
-        context: context,
-        layout: layout,
-        myData: null,
-        user: user,
-        dataState: DataState.loading(),
-      );
-      return _settingWidget(context, layout, settingMenus);
-    } else {
-      final Map<String, List<Widget>> settingMenus = _getSettingMenus(
-        context: context,
-        layout: layout,
-        myData: myData,
-        user: user,
-        dataState: DataState.normal(),
-      );
-      return _settingWidget(context, layout, settingMenus);
-    }
   }
 }

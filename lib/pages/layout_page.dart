@@ -152,16 +152,17 @@ class BackImageSheet extends ConsumerWidget {
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedImage == null) return;
     final croppedImage = await ImageCropper().cropImage(
-        sourcePath: pickedImage.path,
-        aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: '画像を編集',
-            hideBottomControls: true,
-          ),
-        ]);
+      sourcePath: pickedImage.path,
+      aspectRatio: CropAspectRatio(ratioX: calcWidth, ratioY: calcHeight),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: '画像を編集',
+          hideBottomControls: true,
+        ),
+      ],
+    );
     if (croppedImage == null) return;
     await notifier.changeImage(File(croppedImage.path));
   }

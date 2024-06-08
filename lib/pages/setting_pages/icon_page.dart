@@ -28,14 +28,21 @@ class _IconPageState extends SettingState<IconPage> {
 
   Future<void> _pickImage() async {
     try {
-      final XFile? pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+      final XFile? pickedImage = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 25,
+      );
       if (pickedImage == null) return;
       final croppedImage = await ImageCropper().cropImage(
         sourcePath: pickedImage.path,
         cropStyle: CropStyle.circle,
         compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 0,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: '画像を編集',
+            hideBottomControls: true,
+          ),
+        ],
       );
       if (croppedImage == null) return;
       setState(() => _imageFile = File(croppedImage.path));

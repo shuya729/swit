@@ -10,6 +10,17 @@ abstract class SettingState<T extends ConsumerStatefulWidget>
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
       GlobalKey<ScaffoldMessengerState>();
 
+  static Future<void> push(BuildContext context, Widget next) async {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => next,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
+    );
+  }
+
   void showMsgbar(String message) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     _scaffoldKey.currentState?.showSnackBar(

@@ -5,35 +5,42 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
 import '../../models/layout.dart';
+import '../../models/messaging.dart';
 import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
 
 class SigninDialog extends SettingDialog {
-  const SigninDialog({super.key});
+  const SigninDialog(super.showMsgbar, {super.key});
 
-  Future<User?> _signInWithGoogle() async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return null;
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-    final OAuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    final UserCredential userCredential =
-        await auth.signInWithCredential(credential);
-    return userCredential.user;
+  Future<void> _signInWithGoogle() async {
+    try {
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await auth.signInWithCredential(credential);
+      await Messaging().init();
+    } catch (e) {
+      showMsgbar('サインインに失敗しました。');
+    }
   }
 
-  Future<User?> _singInWithApple() async {
-    final FirebaseAuth auth = FirebaseAuth.instance;
-    final appleProvider = AppleAuthProvider();
-    appleProvider.addScope('email');
-    appleProvider.addScope('name');
-    final UserCredential userCredential =
-        await auth.signInWithProvider(appleProvider);
-    return userCredential.user;
+  Future<void> _singInWithApple() async {
+    try {
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      final appleProvider = AppleAuthProvider();
+      appleProvider.addScope('email');
+      appleProvider.addScope('name');
+      await auth.signInWithProvider(appleProvider);
+      await Messaging().init();
+    } catch (e) {
+      showMsgbar('サインインに失敗しました。');
+    }
   }
 
   @override

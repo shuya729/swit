@@ -45,13 +45,12 @@ class UserData {
     String? image,
   }) async {
     final DocumentReference ref = firestore.collection('users').doc(uid);
-    final DateTime now = DateTime.now();
     name ??= this.name;
     image ??= this.image;
     await ref.update({
       'name': name,
       'image': image,
-      'upddt': now,
+      'upddt': FieldValue.serverTimestamp(),
     });
   }
 }
