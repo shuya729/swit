@@ -303,6 +303,9 @@ class LogWidget extends ConsumerWidget {
       decoration: BoxDecoration(
         color: layout.mainText.withOpacity(percent),
         borderRadius: BorderRadius.circular(4),
+        border: now.month == date.month && now.day == date.day
+            ? Border.all(color: layout.subBack)
+            : null,
       ),
     );
   }
