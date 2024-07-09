@@ -24,6 +24,7 @@ class Layout {
 
   static const double _mainBackRate = 0.6;
   static const double _subTextRate = 0.3;
+  static const String _imageFile = 'image.jpg';
 
   static Layout get def {
     const Color defTheme = Colors.teal;
@@ -59,14 +60,18 @@ class Layout {
     );
   }
 
-  static Layout read({required SharedPreferences prefs}) {
+  static Layout read({
+    required SharedPreferences prefs,
+    required String localPath,
+  }) {
     Layout layout = def;
     final int? theme = prefs.getInt('theme');
-    final String imagePath = prefs.getString('imagePath') ?? '';
+    final String imageFile = prefs.getString('imageFile') ?? '';
+    final String imagePath = '$localPath/$imageFile';
     if (theme != null) {
       layout = layout._copyWithColor(Color(theme));
     }
-    if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
+    if (imageFile.isNotEmpty && File(imagePath).existsSync()) {
       layout = layout._copyWithImage(File(imagePath));
     }
     return layout;
@@ -76,17 +81,18 @@ class Layout {
     required Color theme,
     required File? image,
     required SharedPreferences prefs,
-    required String imagePath,
+    required String localPath,
   }) async {
     if (theme != this.theme) {
       await prefs.setInt('theme', theme.value);
     }
     if (image != this.image) {
+      final String imagePath = '$localPath/$_imageFile';
       if (image != null) {
-        await prefs.setString('imagePath', imagePath);
+        await prefs.setString('imageFile', _imageFile);
         await File(imagePath).writeAsBytes(image.readAsBytesSync());
       } else {
-        await prefs.remove('imagePath');
+        await prefs.remove('imageFile');
         await File(this.image!.path).delete();
       }
     }

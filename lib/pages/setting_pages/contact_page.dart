@@ -229,11 +229,10 @@ class _ContactPageState extends SettingState<ContactPage> {
                             value: 0,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
-                            fillColor: MaterialStateProperty.resolveWith(
-                              (states) =>
-                                  states.contains(MaterialState.selected)
-                                      ? layout.subBack
-                                      : layout.subText,
+                            fillColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? layout.subBack
+                                  : layout.subText,
                             ),
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 0),
@@ -264,11 +263,10 @@ class _ContactPageState extends SettingState<ContactPage> {
                             value: 1,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
-                            fillColor: MaterialStateProperty.resolveWith(
-                              (states) =>
-                                  states.contains(MaterialState.selected)
-                                      ? layout.subBack
-                                      : layout.subText,
+                            fillColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? layout.subBack
+                                  : layout.subText,
                             ),
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 1),
@@ -303,11 +301,10 @@ class _ContactPageState extends SettingState<ContactPage> {
                             value: 2,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
-                            fillColor: MaterialStateProperty.resolveWith(
-                              (states) =>
-                                  states.contains(MaterialState.selected)
-                                      ? layout.subBack
-                                      : layout.subText,
+                            fillColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? layout.subBack
+                                  : layout.subText,
                             ),
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 2),
@@ -337,11 +334,10 @@ class _ContactPageState extends SettingState<ContactPage> {
                             value: 3,
                             groupValue: _subjectValue,
                             visualDensity: VisualDensity.compact,
-                            fillColor: MaterialStateProperty.resolveWith(
-                              (states) =>
-                                  states.contains(MaterialState.selected)
-                                      ? layout.subBack
-                                      : layout.subText,
+                            fillColor: WidgetStateProperty.resolveWith(
+                              (states) => states.contains(WidgetState.selected)
+                                  ? layout.subBack
+                                  : layout.subText,
                             ),
                             onChanged: (value) =>
                                 setState(() => _subjectValue = 3),

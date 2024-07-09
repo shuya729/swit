@@ -17,32 +17,32 @@ class LayoutNotifier extends StateNotifier<Layout?> {
   }
 
   SharedPreferences? _prefs;
-  String? _imagePath;
+  String? _localPath;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     final Directory localPath = await getApplicationDocumentsDirectory();
-    _imagePath = '${localPath.path}/image.jpeg';
-    state = Layout.read(prefs: _prefs!);
+    _localPath = localPath.path;
+    state = Layout.read(prefs: _prefs!, localPath: _localPath!);
   }
 
   Future<void> changeTheme(Color theme) async {
-    if (state == null || _prefs == null || _imagePath == null) return;
+    if (state == null || _prefs == null || _localPath == null) return;
     state = await state!.update(
       theme: theme,
       image: state!.image,
       prefs: _prefs!,
-      imagePath: _imagePath!,
+      localPath: _localPath!,
     );
   }
 
   Future<void> changeImage(File? image) async {
-    if (state == null || _prefs == null || _imagePath == null) return;
+    if (state == null || _prefs == null || _localPath == null) return;
     state = await state!.update(
       theme: state!.theme,
       image: image,
       prefs: _prefs!,
-      imagePath: _imagePath!,
+      localPath: _localPath!,
     );
   }
 }

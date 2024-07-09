@@ -35,12 +35,16 @@ class _IconPageState extends SettingState<IconPage> {
       if (pickedImage == null) return;
       final croppedImage = await ImageCropper().cropImage(
         sourcePath: pickedImage.path,
-        cropStyle: CropStyle.circle,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
         compressFormat: ImageCompressFormat.jpg,
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: '画像を編集',
             hideBottomControls: true,
+            cropStyle: CropStyle.circle,
+          ),
+          IOSUiSettings(
+            cropStyle: CropStyle.circle,
           ),
         ],
       );
