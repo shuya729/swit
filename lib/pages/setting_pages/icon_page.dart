@@ -30,11 +30,14 @@ class _IconPageState extends SettingState<IconPage> {
     try {
       final XFile? pickedImage = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        imageQuality: 25,
+        maxHeight: 600,
+        maxWidth: 600,
       );
       if (pickedImage == null) return;
       final croppedImage = await ImageCropper().cropImage(
         sourcePath: pickedImage.path,
+        maxHeight: 200,
+        maxWidth: 200,
         aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
         compressFormat: ImageCompressFormat.jpg,
         uiSettings: [
