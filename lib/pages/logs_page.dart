@@ -226,8 +226,8 @@ class LogsWidget extends ConsumerWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: SizedBox(
-            width: 40,
-            height: 40,
+            width: 22,
+            height: 22,
             child: CircularProgressIndicator(
               strokeWidth: 1.5,
               color: layout.subText,
@@ -543,8 +543,8 @@ class LogWidget extends ConsumerWidget {
             );
           } else {
             return SizedBox(
-              width: 40,
-              height: 40,
+              width: 22,
+              height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5,
                 color: layout.subText,

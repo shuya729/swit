@@ -27,8 +27,8 @@ class LoadingDialog extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           content: Center(
             child: SizedBox(
-              height: 40,
-              width: 40,
+              width: 22,
+              height: 22,
               child: CircularProgressIndicator(
                 strokeWidth: 1.5,
                 color: Colors.white,

@@ -23,7 +23,7 @@ class IconWidget extends ConsumerWidget {
           ? useCache
               ? CachedNetworkImageProvider(url)
               : Image.network(url).image
-          : Image.asset('images/person.png').image,
+          : Image.asset('assets/settings/person.png').image,
     );
   }
 }

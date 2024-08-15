@@ -31,9 +31,13 @@ class HomePage extends StatelessWidget {
               child: ClockWidget(),
             ),
             Spacer(flex: 8),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: NativeAdWidget(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                NativeAdWidget(),
+                LabelWidget(),
+              ],
             ),
             Spacer(flex: 1),
             FriendsWidget(),
@@ -92,7 +96,7 @@ class _ClockWidgetState extends ConsumerState<ClockWidget> {
             // '12:34', // サンプル用のコード
             style: TextStyle(
               fontWeight: FontWeight.w100,
-              fontSize: 75,
+              fontSize: 70,
               letterSpacing: 2,
               height: 1.0,
               color: layout.mainText,
@@ -208,7 +212,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       height: 105,
       width: 320,
       alignment: Alignment.center,
-      margin: const EdgeInsets.symmetric(horizontal: 10),
+      margin: const EdgeInsets.only(left: 10),
       padding: const EdgeInsets.only(left: 15, top: 0, right: 7, bottom: 0),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -228,12 +232,31 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   }
 }
 
+class LabelWidget extends ConsumerWidget {
+  const LabelWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+    return Container(
+      width: 100,
+      height: 100,
+      margin: const EdgeInsets.only(right: 10),
+      child: Image(
+        image: layout.label.bodyImage,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
 class FriendsWidget extends ConsumerWidget {
   const FriendsWidget({super.key});
 
   Widget _friendsBack({required Layout layout, required Widget child}) {
     return Container(
-      height: 48,
+      height: 46,
+      margin: const EdgeInsets.symmetric(horizontal: 25),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
@@ -271,11 +294,11 @@ class FriendsWidget extends ConsumerWidget {
                 return _friendsBack(
                   layout: layout,
                   child: SizedBox(
-                    width: 56,
+                    width: 54,
                     child: Center(
                       child: SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: 16,
+                        width: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
                           color: layout.subText,
@@ -324,7 +347,7 @@ class FriendsWidget extends ConsumerWidget {
         }
 
         if (activeFriends.isEmpty) {
-          return const SizedBox(height: 48);
+          return const SizedBox(height: 46);
         }
 
         return _friendsBack(
@@ -333,13 +356,13 @@ class FriendsWidget extends ConsumerWidget {
             shrinkWrap: true,
             itemCount: activeFriends.length,
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             itemBuilder: (context, index) {
               final UserData friend = activeFriends[index];
               return Padding(
-                padding: const EdgeInsets.all(3),
+                padding: const EdgeInsets.all(2),
                 child: Center(
-                  child: IconWidget(friend.image, radius: 19.4),
+                  child: IconWidget(friend.image, radius: 18),
                 ),
               );
             },

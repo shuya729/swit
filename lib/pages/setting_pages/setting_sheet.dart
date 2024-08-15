@@ -80,10 +80,10 @@ class SettingSheetState extends SettingState<SettingSheet> {
           width: double.infinity,
           alignment: const Alignment(0, -0.6),
           child: SizedBox(
-            height: 25,
-            width: 25,
+            height: 18,
+            width: 18,
             child: CircularProgressIndicator(
-              strokeWidth: 1,
+              strokeWidth: 1.5,
               color: layout.subText,
               strokeCap: StrokeCap.round,
             ),

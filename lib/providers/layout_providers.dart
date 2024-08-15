@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/label.dart';
 import '../models/layout.dart';
 
 final layoutProvider = StateNotifierProvider<LayoutNotifier, Layout?>((_) {
@@ -31,6 +32,7 @@ class LayoutNotifier extends StateNotifier<Layout?> {
     state = await state!.update(
       theme: theme,
       image: state!.image,
+      label: state!.label,
       prefs: _prefs!,
       localPath: _localPath!,
     );
@@ -41,6 +43,18 @@ class LayoutNotifier extends StateNotifier<Layout?> {
     state = await state!.update(
       theme: state!.theme,
       image: image,
+      label: state!.label,
+      prefs: _prefs!,
+      localPath: _localPath!,
+    );
+  }
+
+  Future<void> changeLabel(Label label) async {
+    if (state == null || _prefs == null || _localPath == null) return;
+    state = await state!.update(
+      theme: state!.theme,
+      image: state!.image,
+      label: label,
       prefs: _prefs!,
       localPath: _localPath!,
     );

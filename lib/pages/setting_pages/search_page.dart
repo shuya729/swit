@@ -142,10 +142,10 @@ class _SearchPageState extends SettingState<SearchPage> {
                 alignment: Alignment.bottomCenter,
                 padding: const EdgeInsets.only(top: 15),
                 child: SizedBox(
-                  width: 30,
-                  height: 30,
+                  width: 18,
+                  height: 18,
                   child: CircularProgressIndicator(
-                    strokeWidth: 1,
+                    strokeWidth: 1.5,
                     color: layout.subText,
                     strokeCap: StrokeCap.round,
                   ),
