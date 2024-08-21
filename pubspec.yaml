@@ -86,12 +86,12 @@ flutter:
     - assets/settings/person.png
 
     # 以下ラベル画像
-    - assets/labels/head/0101_cat.png
-    - assets/labels/body/0101_cat.gif
-    - assets/labels/head/0103_dolphin.png
-    - assets/labels/body/0103_dolphin.gif
-    - assets/labels/head/0104_penguin.png
-    - assets/labels/body/0104_penguin.gif
+    - assets/labels/head/LB0101_cat.png
+    - assets/labels/body/LB0101_cat.gif
+    - assets/labels/head/LB0103_dolphin.png
+    - assets/labels/body/LB0103_dolphin.gif
+    - assets/labels/head/LB0104_penguin.png
+    - assets/labels/body/LB0104_penguin.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

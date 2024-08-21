@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 
 class Label {
@@ -20,7 +22,7 @@ class Label {
   factory Label.fromId(String id) {
     return Labels.all.firstWhere(
       (Label label) => label.id == id,
-      orElse: () => Labels._dolphin,
+      orElse: () => Labels.LB0101_cat,
     );
   }
 
@@ -29,34 +31,34 @@ class Label {
 }
 
 final class Labels {
-  static const Label _cat = Label(
-    id: '0101_cat',
+  static const Label LB0101_cat = Label(
+    id: 'LB0101_cat',
     category: '動物',
-    head: 'assets/labels/head/0101_cat.png',
-    body: 'assets/labels/body/0101_cat.gif',
+    head: 'assets/labels/head/LB0101_cat.png',
+    body: 'assets/labels/body/LB0101_cat.gif',
     paid: false,
   );
 
-  static const Label _dolphin = Label(
-    id: '0103_dolphin',
+  static const Label LB0103_dolphin = Label(
+    id: 'LB0103_dolphin',
     category: '動物',
-    head: 'assets/labels/head/0103_dolphin.png',
-    body: 'assets/labels/body/0103_dolphin.gif',
+    head: 'assets/labels/head/LB0103_dolphin.png',
+    body: 'assets/labels/body/LB0103_dolphin.gif',
     paid: false,
   );
 
-  static const Label _penguin = Label(
-    id: '0104_penguin',
+  static const Label LB0104_penguin = Label(
+    id: 'LB0104_penguin',
     category: '動物',
-    head: 'assets/labels/head/0104_penguin.png',
-    body: 'assets/labels/body/0104_penguin.gif',
+    head: 'assets/labels/head/LB0104_penguin.png',
+    body: 'assets/labels/body/LB0104_penguin.gif',
     paid: true,
   );
 
   static const List<Label> all = <Label>[
-    _cat,
-    _dolphin,
-    _penguin,
+    LB0101_cat,
+    LB0103_dolphin,
+    LB0104_penguin,
   ];
 
   static List<String> get ids => all.map((Label label) => label.id).toList();
