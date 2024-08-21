@@ -114,6 +114,8 @@ class NativeAdWidget extends ConsumerStatefulWidget {
 class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   NativeAd? _nativeAd;
   bool _nativeAdIsLoaded = false;
+  bool _showAd = false;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -125,6 +127,7 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     _nativeAd?.dispose();
     super.dispose();
   }
@@ -157,6 +160,10 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
   Future<void> _load() async {
     final Layout? layout = ref.watch(layoutProvider);
     if (layout == null) return;
+
+    setState(() => _nativeAdIsLoaded = false);
+    await _nativeAd?.dispose();
+
     _nativeAd = NativeAd(
       adUnitId: _adUnitId,
       request: const AdRequest(),
@@ -164,12 +171,26 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       nativeTemplateStyle: _nativeTemplateStyle(layout),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          setState(() => _nativeAdIsLoaded = true);
+          setState(() {
+            _nativeAdIsLoaded = true;
+            _showAd = true;
+          });
         },
         onAdFailedToLoad: (ad, error) => ad.dispose(),
       ),
     );
     await _nativeAd?.load();
+  }
+
+  Future<void> _onEnd() async {
+    if (_showAd) {
+      _timer = Timer(
+        const Duration(minutes: 1),
+        () => setState(() => _showAd = false),
+      );
+    } else {
+      await _load();
+    }
   }
 
   @override
@@ -196,7 +217,12 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
       ),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: _nativeAdIsLoaded ? AdWidget(ad: _nativeAd!) : null,
+        child: AnimatedOpacity(
+          opacity: _showAd ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 400),
+          onEnd: _onEnd,
+          child: _nativeAdIsLoaded ? AdWidget(ad: _nativeAd!) : null,
+        ),
       ),
     );
   }

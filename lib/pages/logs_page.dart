@@ -155,17 +155,69 @@ class LogsWidget extends ConsumerWidget {
 
     if (user == null) {
       return SizedBox(
-        height: bodyHeight / 2,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Text(
-            'サインインが必要です。',
-            style: TextStyle(
-              fontWeight: FontWeight.w300,
-              color: layout.mainText,
-              fontSize: 16,
+        height: bodyHeight * 2 / 3,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Spacer(flex: 8),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '右上の設定より ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      color: layout.mainText,
+                      fontSize: 16,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'サインイン',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      color: layout.subBack,
+                      fontSize: 18,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' してください',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      color: layout.mainText,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            const Spacer(flex: 4),
+            Text(
+              '< 利用可能となる機能 >',
+              style: TextStyle(
+                fontWeight: FontWeight.w300,
+                color: layout.mainText,
+                fontSize: 16,
+              ),
+            ),
+            const Spacer(flex: 1),
+            Text(
+              'アプリを開いている時間をログとして記録',
+              style: TextStyle(
+                fontWeight: FontWeight.w300,
+                color: layout.mainText,
+                fontSize: 16,
+              ),
+            ),
+            const Spacer(flex: 1),
+            Text(
+              'フレンドと勉強時間を共有',
+              style: TextStyle(
+                fontWeight: FontWeight.w300,
+                color: layout.mainText,
+                fontSize: 16,
+              ),
+            ),
+          ],
         ),
       );
     } else if (myData == null) {
@@ -303,6 +355,9 @@ class LogWidget extends ConsumerWidget {
       decoration: BoxDecoration(
         color: layout.mainText.withOpacity(percent),
         borderRadius: BorderRadius.circular(4),
+        border: now.month == date.month && now.day == date.day
+            ? Border.all(color: layout.subBack)
+            : null,
       ),
     );
   }
