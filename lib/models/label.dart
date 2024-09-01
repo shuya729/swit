@@ -34,31 +34,49 @@ final class Labels {
   static const Label LB0101_cat = Label(
     id: 'LB0101_cat',
     category: '動物',
-    head: 'assets/labels/head/LB0101_cat.png',
-    body: 'assets/labels/body/LB0101_cat.gif',
+    head: 'assets/labels/LB0101_cat/LB0101_cat.png',
+    body: 'assets/labels/LB0101_cat/LB0101_cat.gif',
+    paid: false,
+  );
+
+  static const Label LB0102_bird = Label(
+    id: 'LB0102_bird',
+    category: '動物',
+    head: 'assets/labels/LB0102_bird/LB0102_bird.png',
+    body: 'assets/labels/LB0102_bird/LB0102_bird.gif',
     paid: false,
   );
 
   static const Label LB0103_dolphin = Label(
     id: 'LB0103_dolphin',
     category: '動物',
-    head: 'assets/labels/head/LB0103_dolphin.png',
-    body: 'assets/labels/body/LB0103_dolphin.gif',
+    head: 'assets/labels/LB0103_dolphin/LB0103_dolphin.png',
+    body: 'assets/labels/LB0103_dolphin/LB0103_dolphin.gif',
     paid: false,
   );
 
   static const Label LB0104_penguin = Label(
     id: 'LB0104_penguin',
     category: '動物',
-    head: 'assets/labels/head/LB0104_penguin.png',
-    body: 'assets/labels/body/LB0104_penguin.gif',
+    head: 'assets/labels/LB0104_penguin/LB0104_penguin.png',
+    body: 'assets/labels/LB0104_penguin/LB0104_penguin.gif',
+    paid: true,
+  );
+
+  static const Label LB0105_rabbit = Label(
+    id: 'LB0105_rabbit',
+    category: '動物',
+    head: 'assets/labels/LB0105_rabbit/LB0105_rabbit.png',
+    body: 'assets/labels/LB0105_rabbit/LB0105_rabbit.gif',
     paid: true,
   );
 
   static const List<Label> all = <Label>[
     LB0101_cat,
+    LB0102_bird,
     LB0103_dolphin,
     LB0104_penguin,
+    LB0105_rabbit,
   ];
 
   static List<String> get ids => all.map((Label label) => label.id).toList();

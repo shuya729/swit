@@ -15,23 +15,24 @@ import '../providers/my_data_privder.dart';
 import '../widgets/icon_widget.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.pageController});
+  final PageController? pageController;
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    return SafeArea(
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Spacer(flex: 2),
-            Align(
+            const Spacer(flex: 2),
+            const Align(
               alignment: Alignment.topLeft,
               child: ClockWidget(),
             ),
-            Spacer(flex: 8),
-            Row(
+            const Spacer(flex: 8),
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -39,8 +40,8 @@ class HomePage extends StatelessWidget {
                 LabelWidget(),
               ],
             ),
-            Spacer(flex: 1),
-            FriendsWidget(),
+            const Spacer(flex: 1),
+            FriendsWidget(pageController: pageController),
           ],
         ),
       ),
@@ -251,7 +252,8 @@ class LabelWidget extends ConsumerWidget {
 }
 
 class FriendsWidget extends ConsumerWidget {
-  const FriendsWidget({super.key});
+  const FriendsWidget({super.key, required this.pageController});
+  final PageController? pageController;
 
   Widget _friendsBack({required Layout layout, required Widget child}) {
     return Container(
@@ -271,6 +273,15 @@ class FriendsWidget extends ConsumerWidget {
     );
   }
 
+  Future<void> _animateToPage(int page) async {
+    if (pageController == null) return;
+    await pageController?.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Presence presence = Presence.instance;
@@ -286,7 +297,65 @@ class FriendsWidget extends ConsumerWidget {
       builder: (context, snapshot) {
         final bool connected = snapshot.data ?? false;
         final bool completed = myData == null || myData.bgndt != null;
-        if (connected == false || completed == false) {
+
+        if (myData == null) {
+          return SizedBox(
+            height: 46,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _animateToPage(0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.arrow_left,
+                          size: 23,
+                          color: layout.subText,
+                        ),
+                        Text(
+                          'レイアウト',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            color: layout.mainText,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _animateToPage(2),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Row(
+                      children: [
+                        Text(
+                          'ログ',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w300,
+                            color: layout.mainText,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_right,
+                          size: 23,
+                          color: layout.subText,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else if (connected == false || completed == false) {
           return FutureBuilder(
             future: Future.delayed(const Duration(seconds: 60)),
             builder: (context, snapshot) {

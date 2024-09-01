@@ -10,7 +10,10 @@ const { getStorage } = require("firebase-admin/storage");
 const { getDatabase } = require("firebase-admin/database");
 const { getMessaging } = require("firebase-admin/messaging");
 const { user } = require("firebase-functions/v1/auth");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const {
+  onDocumentCreated,
+  onDocumentWritten,
+} = require("firebase-functions/v2/firestore");
 const {
   onValueCreated,
   onValueUpdated,
@@ -45,6 +48,7 @@ exports.deleteFunction = user().onDelete(async (user) => {
   const userRef = firestore.collection("users").doc(user.uid);
   await userRef.delete();
 
+  // 後で削除
   const statesQuery = firestore
     .collection("friends")
     .where(user.uid, "in", [
@@ -56,6 +60,12 @@ exports.deleteFunction = user().onDelete(async (user) => {
     ]);
   const statesDocs = await statesQuery.get();
 
+  const myFriendsRef = firestore
+    .collection("users")
+    .doc(user.uid)
+    .collection("friends");
+  const myFriendsDocs = await myFriendsRef.get();
+
   const logsRef = firestore
     .collection("users")
     .doc(user.uid)
@@ -64,9 +74,22 @@ exports.deleteFunction = user().onDelete(async (user) => {
 
   const batch = firestore.batch();
 
+  // 後で削除
   if (!statesDocs.empty) {
     statesDocs.forEach((doc) => {
       batch.update(doc.ref, { [user.uid]: FieldValue.delete() });
+    });
+  }
+
+  if (!myFriendsDocs.empty) {
+    myFriendsDocs.forEach((doc) => {
+      batch.delete(doc.ref);
+      const tgtFriendRef = firestore
+        .collection("users")
+        .doc(doc.id)
+        .collection("friends")
+        .doc(user.uid);
+      batch.delete(tgtFriendRef);
     });
   }
 
@@ -90,6 +113,82 @@ exports.deleteFunction = user().onDelete(async (user) => {
   }
 });
 
+exports.friendMessageFunction = onDocumentWritten(
+  {
+    document: "users/{userId}/friends/{friendId}",
+    concurrency: 50,
+    cpu: 1,
+    memory: "256MiB",
+    timeoutSeconds: 10,
+  },
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+
+    if (!beforeData) {
+      const uid = afterData.uid;
+      const tgt = afterData.tgt;
+      const state = afterData.state;
+
+      if (state === "requesting") await toMessaging(uid, tgt, "request");
+    } else if (!afterData) {
+      const uid = beforeData.uid;
+      const tgt = beforeData.tgt;
+      const state = beforeData.state;
+
+      if (state === "requesting") {
+        const ref = firestore
+          .collection("messages")
+          .doc(uid + "-" + tgt + "-" + "request");
+        await ref.delete();
+      }
+    } else {
+      const uid = beforeData.uid;
+      const tgt = beforeData.tgt;
+      const beforeState = beforeData.state;
+      const afterState = afterData.state;
+
+      if (beforeState === "requested" && afterState === "friend") {
+        await toMessaging(uid, tgt, "friend");
+      }
+    }
+
+    // 後で削除
+    // 反映されていない場合、追加
+    firestore.runTransaction(async (t) => {
+      if (!beforeData) {
+        const uid = afterData.uid;
+        const tgt = afterData.tgt;
+        const state = afterData.state;
+        const ref = firestore.collection("friends").doc(uid);
+        const doc = await t.get(ref);
+        if (!doc.exists || doc.data()[tgt] !== state) {
+          t.set(ref, { [tgt]: state }, { merge: true });
+        }
+      } else if (!afterData) {
+        const uid = beforeData.uid;
+        const tgt = beforeData.tgt;
+        const state = beforeData.state;
+        const ref = firestore.collection("friends").doc(uid);
+        const doc = await t.get(ref);
+        if (doc.exists && doc.data()[tgt]) {
+          t.set(ref, { [tgt]: FieldValue.delete() }, { merge: true });
+        }
+      } else {
+        const uid = beforeData.uid;
+        const tgt = beforeData.tgt;
+        const afterState = afterData.state;
+        const ref = firestore.collection("friends").doc(uid);
+        const doc = await t.get(ref);
+        if (doc.exists && doc.data()[tgt] !== afterState) {
+          t.set(ref, { [tgt]: afterState }, { merge: true });
+        }
+      }
+    });
+  }
+);
+
+// 後で削除
 exports.requestFunction = onDocumentCreated(
   {
     document: "requests/{requestId}",
@@ -108,7 +207,17 @@ exports.requestFunction = onDocumentCreated(
 
     const sourceRef = event.data.ref;
     const myFriendRef = firestore.collection("friends").doc(uid);
+    const ufriendsRef = firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .doc(tgt);
     const tgtFriendRef = firestore.collection("friends").doc(tgt);
+    const tfriendsRef = firestore
+      .collection("users")
+      .doc(tgt)
+      .collection("friends")
+      .doc(uid);
 
     await firestore.runTransaction(async (t) => {
       const sourceDoc = await t.get(sourceRef);
@@ -127,28 +236,140 @@ exports.requestFunction = onDocumentCreated(
         ) {
           t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          await messaging(uid, [tgt], "friend");
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "friend",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          t.set(
+            tfriendsRef,
+            {
+              uid: tgt,
+              tgt: uid,
+              state: "friend",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          // await messaging(uid, [tgt], "friend");
         } else {
           t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
-          await messaging(uid, [tgt], "request");
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "requesting",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          t.set(
+            tfriendsRef,
+            {
+              uid: tgt,
+              tgt: uid,
+              state: "requested",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          // await messaging(uid, [tgt], "request");
         }
       } else if (request === "unfriend") {
         t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
         t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
+        t.delete(ufriendsRef);
+        t.delete(tfriendsRef);
       } else if (request === "block") {
         if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
           t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "blocking",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
         } else {
           t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "blocking",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          t.set(
+            tfriendsRef,
+            {
+              uid: tgt,
+              tgt: uid,
+              state: "blocked",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
         }
       } else if (request === "unblock") {
         if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
           t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "blocked",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
         } else {
           t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
           t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
+          t.set(
+            ufriendsRef,
+            {
+              uid: uid,
+              tgt: tgt,
+              state: "friend",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+          t.set(
+            tfriendsRef,
+            {
+              uid: tgt,
+              tgt: uid,
+              state: "friend",
+              upddt: FieldValue.serverTimestamp(),
+              credt: FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
         }
       }
     });
@@ -210,12 +431,15 @@ exports.studyingFunction = onValueUpdated(
 
     if (upddt > credt + hour) return;
 
-    const snapshot = await firestore.collection("friends").doc(uid).get();
-    if (!snapshot.exists) return;
+    const snapshot = await firestore
+      .collection("users")
+      .doc(uid)
+      .collection("friends")
+      .get();
 
-    const tgts = Object.keys(snapshot.data()).filter(
-      (key) => snapshot.data()[key] === "friend"
-    );
+    if (snapshot.empty) return;
+
+    const tgts = snapshot.docs.map((doc) => doc.id);
     if (tgts.length === 0) return;
 
     await messaging(uid, tgts, "studing");
@@ -306,6 +530,7 @@ exports.presenceCroller = onSchedule(
   }
 );
 
+// 後で削除
 exports.requestCroller = onSchedule(
   {
     schedule: "30 * * * *",
@@ -431,11 +656,25 @@ function getDateKey(date) {
   return `${year}-${month}-${day}`;
 }
 
+async function toMessaging(uid, tgt, type) {
+  const ref = firestore
+    .collection("messages")
+    .doc(uid + "-" + tgt + "-" + type);
+  await ref.set({
+    uid: uid,
+    tgt: tgt,
+    type: type,
+    upddt: FieldValue.serverTimestamp(),
+  });
+  await messaging(uid, [tgt], type);
+}
+
 async function messaging(uid, tgts, type) {
   const now = new Date().getTime();
   const baseTime = 30 * 24 * 60 * 60 * 1000;
   const tokens = [];
   const failed = [];
+  const ntfCounts = {};
 
   if (!Array.isArray(tgts)) return;
   const snapshot = await firestore
@@ -444,12 +683,20 @@ async function messaging(uid, tgts, type) {
     .get();
   if (snapshot.empty) return;
 
+  const messages = await firestore
+    .collection("messages")
+    .where("tgt", "in", tgts)
+    .get();
+
   snapshot.forEach((doc) => {
     Object.keys(doc.data()).forEach((key) => {
       if (key === "uid") return;
       const val = doc.data()[key];
       if (val instanceof Timestamp && val.toMillis() > now - baseTime) {
         tokens.push(key);
+        ntfCounts[key] = messages.docs.filter(
+          (ntfdoc) => ntfdoc.data().tgt === doc.id
+        ).length;
       } else {
         failed.push(key);
       }
@@ -475,31 +722,36 @@ async function messaging(uid, tgts, type) {
     }
     if (title === "" || body === "") return;
 
-    const message = {
-      tokens: tokens,
-      notification: {
-        title: title,
-        body: body,
-      },
-      android: {
+    const messages = [];
+    tokens.forEach((token) => {
+      messages.push({
+        token: token,
         notification: {
-          sound: "default",
+          title: title,
+          body: body,
         },
-      },
-      apns: {
-        payload: {
-          aps: {
+        android: {
+          notification: {
+            // notification_count: ntfCounts[token], // 後でコメント外す
             sound: "default",
           },
         },
-      },
-    };
-    const ret = await getMessaging().sendEachForMulticast(message);
+        apns: {
+          payload: {
+            aps: {
+              // badge: ntfCounts[token], // 後でコメント外す
+              sound: "default",
+            },
+          },
+        },
+      });
+    });
+    const ret = await getMessaging().sendEach(messages);
 
     if (ret.failureCount > 0) {
       ret.responses.forEach((resp, idx) => {
         if (!resp.success) {
-          failed.push(message.tokens[idx]);
+          failed.push(tokens[idx]);
         }
       });
     }
@@ -523,5 +775,30 @@ async function messaging(uid, tgts, type) {
 
 // const { onRequest } = require("firebase-functions/v2/https");
 // exports.testFunction = onRequest(async (req, res) => {
+//   // const uid = req.query.uid ?? "3672Q3SJxUNCDhHeLQRThmUa9vj1";
+//   const friendsRef = firestore.collection("friends");
+//   const friendsDocs = await friendsRef.get();
+//   const batch = firestore.batch();
+//   friendsDocs.forEach((doc) => {
+//     const uid = doc.id;
+//     const data = doc.data();
+//     Object.keys(data).forEach((key) => {
+//       const ref = firestore
+//         .collection("users")
+//         .doc(uid)
+//         .collection("friends")
+//         .doc(key);
+//       const tgt = key;
+//       const state = data[key];
+//       batch.set(ref, {
+//         uid: uid,
+//         tgt: tgt,
+//         state: state,
+//         upddt: FieldValue.serverTimestamp(),
+//         credt: FieldValue.serverTimestamp(),
+//       });
+//     });
+//   });
+//   await batch.commit();
 //   res.send("ok");
 // });

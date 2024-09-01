@@ -69,7 +69,7 @@ class LayoutPage extends ConsumerWidget {
             ),
             height: height,
             width: width,
-            child: const HomePage(),
+            child: const HomePage(pageController: null),
           ),
         ),
         SafeArea(
@@ -172,8 +172,12 @@ class LayoutPage extends ConsumerWidget {
                               margin: const EdgeInsets.symmetric(horizontal: 8),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                border:
-                                    Border.all(color: layout.subText, width: 1),
+                                border: Border.all(
+                                  color: layout.label.id == label.id
+                                      ? layout.mainText
+                                      : layout.subText,
+                                  width: 1,
+                                ),
                               ),
                               child: Image(
                                 image: label.headImage,

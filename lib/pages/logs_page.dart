@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/date_key.dart';
 import '../models/layout.dart';
 import '../models/logs.dart';
+import '../models/message.dart';
 import '../models/user_data.dart';
 import '../providers/auth_provider.dart';
 import '../providers/friends_provider.dart';
 import '../providers/layout_providers.dart';
 import '../providers/my_data_privder.dart';
+import '../providers/messages_provider.dart';
 import '../widgets/icon_widget.dart';
 import 'setting_pages/setting_sheet.dart';
 
@@ -56,6 +59,19 @@ class _LogsPageState extends ConsumerState<LogsPage> {
     });
   }
 
+  void _showSettingSheet() {
+    showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (context) => Navigator(
+        onGenerateRoute: (context) => MaterialPageRoute(
+          builder: (context) => const SettingSheet(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double bodyHeight = MediaQuery.of(context).size.height -
@@ -63,6 +79,7 @@ class _LogsPageState extends ConsumerState<LogsPage> {
         MediaQuery.of(context).padding.bottom -
         70;
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
+    final List<Message> messages = ref.watch(messagesProvider);
 
     return SafeArea(
       child: Padding(
@@ -90,23 +107,16 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                useSafeArea: true,
-                                isScrollControlled: true,
-                                context: context,
-                                builder: (context) => Navigator(
-                                  onGenerateRoute: (context) =>
-                                      MaterialPageRoute(
-                                    builder: (context) => const SettingSheet(),
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: Icon(
-                              Icons.settings_outlined,
-                              size: 23,
-                              color: layout.subText,
+                            onPressed: _showSettingSheet,
+                            icon: Badge(
+                              smallSize: 8,
+                              isLabelVisible: messages.isNotEmpty,
+                              backgroundColor: layout.subBack,
+                              child: Icon(
+                                Icons.settings_outlined,
+                                size: 23,
+                                color: layout.subText,
+                              ),
                             ),
                           ),
                         ],
@@ -125,6 +135,7 @@ class _LogsPageState extends ConsumerState<LogsPage> {
               friends: _friends,
               bodyHeight: bodyHeight,
               callBack: _callBack,
+              showSettingSheet: _showSettingSheet,
               expandIndex: _expandedIndex,
             ),
           ],
@@ -140,11 +151,13 @@ class LogsWidget extends ConsumerWidget {
     required this.friends,
     required this.bodyHeight,
     required this.callBack,
+    required this.showSettingSheet,
     required this.expandIndex,
   });
   final List<UserData> friends;
   final double bodyHeight;
   final Function(int, bool) callBack;
+  final Function showSettingSheet;
   final int? expandIndex;
 
   @override
@@ -173,6 +186,8 @@ class LogsWidget extends ConsumerWidget {
                   ),
                   TextSpan(
                     text: 'サインイン',
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => showSettingSheet(),
                     style: TextStyle(
                       fontWeight: FontWeight.w300,
                       color: layout.subBack,

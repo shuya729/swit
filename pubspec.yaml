@@ -59,6 +59,7 @@ dependencies:
   firebase_crashlytics:
   firebase_app_check:
   firebase_messaging:
+  flutter_app_badge_control:
 
 dev_dependencies:
   flutter_test:
@@ -86,12 +87,16 @@ flutter:
     - assets/settings/person.png
 
     # 以下ラベル画像
-    - assets/labels/head/LB0101_cat.png
-    - assets/labels/body/LB0101_cat.gif
-    - assets/labels/head/LB0103_dolphin.png
-    - assets/labels/body/LB0103_dolphin.gif
-    - assets/labels/head/LB0104_penguin.png
-    - assets/labels/body/LB0104_penguin.gif
+    - assets/labels/LB0101_cat/LB0101_cat.png
+    - assets/labels/LB0101_cat/LB0101_cat.gif
+    - assets/labels/LB0102_bird/LB0102_bird.png
+    - assets/labels/LB0102_bird/LB0102_bird.gif
+    - assets/labels/LB0103_dolphin/LB0103_dolphin.png
+    - assets/labels/LB0103_dolphin/LB0103_dolphin.gif
+    - assets/labels/LB0104_penguin/LB0104_penguin.png
+    - assets/labels/LB0104_penguin/LB0104_penguin.gif
+    - assets/labels/LB0105_rabbit/LB0105_rabbit.png
+    - assets/labels/LB0105_rabbit/LB0105_rabbit.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
