@@ -60,6 +60,7 @@ dependencies:
   firebase_app_check:
   firebase_messaging:
   flutter_app_badge_control:
+  synchronized:
 
 dev_dependencies:
   flutter_test:

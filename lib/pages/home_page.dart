@@ -291,71 +291,83 @@ class FriendsWidget extends ConsumerWidget {
     final List<UserData> activeFriends =
         friends.where((friend) => friend.bgndt != null).toList();
 
-    return StreamBuilder(
-      initialData: presence.connected,
-      stream: presence.connectedStream,
-      builder: (context, snapshot) {
-        final bool connected = snapshot.data ?? false;
-        final bool completed = myData == null || myData.bgndt != null;
-
-        if (myData == null) {
-          return SizedBox(
-            height: 46,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _animateToPage(0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.arrow_left,
-                          size: 23,
-                          color: layout.subText,
-                        ),
-                        Text(
-                          'レイアウト',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            color: layout.mainText,
-                            fontSize: 14,
+    if (myData == null) {
+      return FutureBuilder(
+        future: Future.delayed(const Duration(microseconds: 600)),
+        builder: (context, snapshot) {
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 400),
+            opacity:
+                snapshot.connectionState == ConnectionState.done ? 1.0 : 0.0,
+            child: SizedBox(
+              height: 46,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _animateToPage(0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.arrow_left,
+                            size: 23,
+                            color: layout.subText,
                           ),
-                        ),
-                      ],
+                          Text(
+                            'レイアウト',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                              color: layout.mainText,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _animateToPage(2),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Row(
-                      children: [
-                        Text(
-                          'ログ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            color: layout.mainText,
-                            fontSize: 14,
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _animateToPage(2),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Row(
+                        children: [
+                          Text(
+                            'ログ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                              color: layout.mainText,
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
-                        Icon(
-                          Icons.arrow_right,
-                          size: 23,
-                          color: layout.subText,
-                        ),
-                      ],
+                          Icon(
+                            Icons.arrow_right,
+                            size: 23,
+                            color: layout.subText,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
-        } else if (connected == false || completed == false) {
+        },
+      );
+    }
+
+    return StreamBuilder(
+      initialData: presence.state,
+      stream: presence.stateStream,
+      builder: (context, snapshot) {
+        final bool connected = snapshot.data ?? false;
+        final bool completed = myData.bgndt != null;
+
+        if (connected == false || completed == false) {
           return FutureBuilder(
             future: Future.delayed(const Duration(seconds: 60)),
             builder: (context, snapshot) {
