@@ -79,14 +79,14 @@ class Presence {
     } else if (user != null && connected && !display) {
       await goOffline();
     } else if (user != null && !connected && display) {
-      _cancelPresence();
+      await _cancelPresence();
       await database.goOnline();
     } else if (user != null && !connected && !display) {
-      _cancelPresence();
+      await _cancelPresence();
     } else if (user == null && connected) {
       await goOffline();
     } else if (user == null && !connected) {
-      _cancelPresence();
+      await _cancelPresence();
     }
   }
 

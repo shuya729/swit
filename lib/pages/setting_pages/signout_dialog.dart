@@ -15,8 +15,8 @@ class SignoutDialog extends SettingDialog {
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
       final Presence presence = Presence.instance;
-      await presence.goOffline();
       await Messaging().deleteToken();
+      await presence.goOffline();
       await auth.signOut();
     } catch (e) {
       showMsgbar('サインアウトに失敗しました。');

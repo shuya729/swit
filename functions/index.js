@@ -457,7 +457,7 @@ exports.logFunction = onValueDeleted(
   },
   async (event) => {
     const uid = event.data.val().uid;
-    const upddt = event.data.val().upddt;
+    const upd = new Date(event.data.val().upddt);
     const bgn = new Date(event.data.val().credt);
     const now = new Date();
     const baseTime = 60 * 60 * 1000;
@@ -482,9 +482,14 @@ exports.logFunction = onValueDeleted(
     const min = mindt ? new Date(mindt) : null;
     userRef.update({ bgndt: min, upddt: now });
 
-    if (upddt < now.getTime() - baseTime) return;
-    const end = min ?? now;
-    const logs = calcLogs(bgn, end);
+    let logs;
+    if (upd.getTime() >= now.getTime() - baseTime) {
+      const end = min ?? now;
+      logs = calcLogs(bgn, end);
+    } else {
+      logs = calcLogs(bgn, upd);
+    }
+    if (Object.keys(logs).length === 0) return;
     const batch = firestore.batch();
     Object.keys(logs).forEach((key) => {
       const logRef = firestore
@@ -606,7 +611,7 @@ exports.contactFunction = onDocumentCreated(
 
 // 以下、使用する関数
 function calcLogs(bgn, now) {
-  if (bgn.getTime() > now.getTime()) return {};
+  if (bgn.getTime() >= now.getTime()) return {};
   if (
     bgn.getFullYear() !== now.getFullYear() ||
     bgn.getMonth() !== now.getMonth() ||

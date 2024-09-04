@@ -45,8 +45,8 @@ class DeleteDialog extends SettingDialog {
         reauthUser = await _reauthWithApple();
       } else {}
       if (reauthUser == null) return;
-      await presence.goOffline();
       await Messaging().deleteToken();
+      await presence.goOffline();
       await user.delete();
     } catch (e) {
       showMsgbar('アカウントの削除に失敗しました。');

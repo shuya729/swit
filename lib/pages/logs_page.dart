@@ -177,7 +177,7 @@ class LogsWidget extends ConsumerWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: '右上の設定より ',
+                    text: '設定より ',
                     style: TextStyle(
                       fontWeight: FontWeight.w300,
                       color: layout.mainText,

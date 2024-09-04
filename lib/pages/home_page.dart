@@ -181,7 +181,10 @@ class _NativeAdWidgetState extends ConsumerState<NativeAdWidget> {
             _showAd = true;
           });
         },
-        onAdFailedToLoad: (ad, error) => ad.dispose(),
+        onAdFailedToLoad: (ad, error) async {
+          await ad.dispose();
+          _timer = Timer(const Duration(minutes: 1), () => _load());
+        },
       ),
     );
     await _nativeAd?.load();
