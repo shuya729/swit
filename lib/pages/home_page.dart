@@ -84,7 +84,7 @@ class _ClockWidgetState extends ConsumerState<ClockWidget> {
         children: [
           Text(
             '${_now.year}/${_now.month.toString().padLeft(2, '0')}/${_now.day.toString().padLeft(2, '0')}',
-            // '2024/04/01', // サンプル用のコード
+            // '2024/09/01', // サンプル用のコード
             style: TextStyle(
               fontWeight: FontWeight.w300,
               fontSize: 24,
@@ -248,6 +248,7 @@ class LabelWidget extends ConsumerWidget {
       margin: const EdgeInsets.only(right: 10),
       child: Image(
         image: layout.label.bodyImage,
+        // image: Label.def.headImage, // サンプル用のコード
         fit: BoxFit.contain,
       ),
     );

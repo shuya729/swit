@@ -317,7 +317,7 @@ class LogWidget extends ConsumerWidget {
     required this.bodyHeight,
   }) {
     now = DateTime.now();
-    // now = DateTime(2024, 4, 1); // サンプル用のコード
+    // now = DateTime(2024, 9, 1); // サンプル用のコード
     logsFuture = _loadLogs(user, now);
   }
   final bool opened;
