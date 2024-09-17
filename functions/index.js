@@ -48,18 +48,6 @@ exports.deleteFunction = user().onDelete(async (user) => {
   const userRef = firestore.collection("users").doc(user.uid);
   await userRef.delete();
 
-  // 後で削除
-  const statesQuery = firestore
-    .collection("friends")
-    .where(user.uid, "in", [
-      "friend",
-      "requesting",
-      "requested",
-      "blocked",
-      "blocking",
-    ]);
-  const statesDocs = await statesQuery.get();
-
   const myFriendsRef = firestore
     .collection("users")
     .doc(user.uid)
@@ -72,14 +60,13 @@ exports.deleteFunction = user().onDelete(async (user) => {
     .collection("logs");
   const logsDocs = await logsRef.get();
 
-  const batch = firestore.batch();
+  const messagesRef = firestore
+    .collection("messages")
+    .where("tgt", "==", user.uid)
+    .get();
+  const messagesDocs = await messagesRef;
 
-  // 後で削除
-  if (!statesDocs.empty) {
-    statesDocs.forEach((doc) => {
-      batch.update(doc.ref, { [user.uid]: FieldValue.delete() });
-    });
-  }
+  const batch = firestore.batch();
 
   if (!myFriendsDocs.empty) {
     myFriendsDocs.forEach((doc) => {
@@ -99,8 +86,11 @@ exports.deleteFunction = user().onDelete(async (user) => {
     });
   }
 
-  const friendsRef = firestore.collection("friends").doc(user.uid);
-  batch.delete(friendsRef);
+  if (!messagesDocs.empty) {
+    messagesDocs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+  }
 
   const tokenRef = firestore.collection("tokens").doc(user.uid);
   batch.delete(tokenRef);
@@ -152,229 +142,6 @@ exports.friendMessageFunction = onDocumentWritten(
         await toMessaging(uid, tgt, "friend");
       }
     }
-
-    // 後で削除
-    // 反映されていない場合、追加
-    firestore.runTransaction(async (t) => {
-      if (!beforeData) {
-        const uid = afterData.uid;
-        const tgt = afterData.tgt;
-        const state = afterData.state;
-        const ref = firestore.collection("friends").doc(uid);
-        const doc = await t.get(ref);
-        if (!doc.exists || doc.data()[tgt] !== state) {
-          t.set(ref, { [tgt]: state }, { merge: true });
-        }
-      } else if (!afterData) {
-        const uid = beforeData.uid;
-        const tgt = beforeData.tgt;
-        const state = beforeData.state;
-        const ref = firestore.collection("friends").doc(uid);
-        const doc = await t.get(ref);
-        if (doc.exists && doc.data()[tgt]) {
-          t.set(ref, { [tgt]: FieldValue.delete() }, { merge: true });
-        }
-      } else {
-        const uid = beforeData.uid;
-        const tgt = beforeData.tgt;
-        const afterState = afterData.state;
-        const ref = firestore.collection("friends").doc(uid);
-        const doc = await t.get(ref);
-        if (doc.exists && doc.data()[tgt] !== afterState) {
-          t.set(ref, { [tgt]: afterState }, { merge: true });
-        }
-      }
-    });
-  }
-);
-
-// 後で削除
-exports.requestFunction = onDocumentCreated(
-  {
-    document: "requests/{requestId}",
-    concurrency: 50,
-    cpu: 1,
-    memory: "256MiB",
-    minInstances: 1,
-    timeoutSeconds: 10,
-  },
-  async (event) => {
-    const data = event.data.data();
-
-    const uid = data.uid;
-    const tgt = data.tgt;
-    const request = data.request;
-
-    const sourceRef = event.data.ref;
-    const myFriendRef = firestore.collection("friends").doc(uid);
-    const ufriendsRef = firestore
-      .collection("users")
-      .doc(uid)
-      .collection("friends")
-      .doc(tgt);
-    const tgtFriendRef = firestore.collection("friends").doc(tgt);
-    const tfriendsRef = firestore
-      .collection("users")
-      .doc(tgt)
-      .collection("friends")
-      .doc(uid);
-
-    await firestore.runTransaction(async (t) => {
-      const sourceDoc = await t.get(sourceRef);
-      if (!sourceDoc.exists) return;
-      const tgtFriendDoc = await t.get(tgtFriendRef);
-
-      if (request === "friend") {
-        if (
-          tgtFriendDoc.exists &&
-          (tgtFriendDoc.data()[uid] === "friend" ||
-            tgtFriendDoc.data()[uid] === "requested")
-        ) {
-        } else if (
-          tgtFriendDoc.exists &&
-          tgtFriendDoc.data()[uid] === "requesting"
-        ) {
-          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "friend",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          t.set(
-            tfriendsRef,
-            {
-              uid: tgt,
-              tgt: uid,
-              state: "friend",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          // await messaging(uid, [tgt], "friend");
-        } else {
-          t.set(tgtFriendRef, { [uid]: "requested" }, { merge: true });
-          t.set(myFriendRef, { [tgt]: "requesting" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "requesting",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          t.set(
-            tfriendsRef,
-            {
-              uid: tgt,
-              tgt: uid,
-              state: "requested",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          // await messaging(uid, [tgt], "request");
-        }
-      } else if (request === "unfriend") {
-        t.set(tgtFriendRef, { [uid]: FieldValue.delete() }, { merge: true });
-        t.set(myFriendRef, { [tgt]: FieldValue.delete() }, { merge: true });
-        t.delete(ufriendsRef);
-        t.delete(tfriendsRef);
-      } else if (request === "block") {
-        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "blocking",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-        } else {
-          t.set(tgtFriendRef, { [uid]: "blocked" }, { merge: true });
-          t.set(myFriendRef, { [tgt]: "blocking" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "blocking",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          t.set(
-            tfriendsRef,
-            {
-              uid: tgt,
-              tgt: uid,
-              state: "blocked",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-        }
-      } else if (request === "unblock") {
-        if (tgtFriendDoc.exists && tgtFriendDoc.data()[uid] === "blocking") {
-          t.set(myFriendRef, { [tgt]: "blocked" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "blocked",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-        } else {
-          t.set(tgtFriendRef, { [uid]: "friend" }, { merge: true });
-          t.set(myFriendRef, { [tgt]: "friend" }, { merge: true });
-          t.set(
-            ufriendsRef,
-            {
-              uid: uid,
-              tgt: tgt,
-              state: "friend",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-          t.set(
-            tfriendsRef,
-            {
-              uid: tgt,
-              tgt: uid,
-              state: "friend",
-              upddt: FieldValue.serverTimestamp(),
-              credt: FieldValue.serverTimestamp(),
-            },
-            { merge: true }
-          );
-        }
-      }
-    });
-
-    await sourceRef.delete();
   }
 );
 
@@ -532,37 +299,6 @@ exports.presenceCroller = onSchedule(
     });
 
     database.ref("presence").update(newData);
-  }
-);
-
-// 後で削除
-exports.requestCroller = onSchedule(
-  {
-    schedule: "30 * * * *",
-    timeZone: timezone,
-    concurrency: 1,
-    cpu: 1,
-    memory: "256MiB",
-    timeoutSeconds: 60,
-  },
-  async (event) => {
-    const now = new Date();
-    const baseDate = new Date(now.getTime() - 15 * 60 * 1000);
-    const query = firestore
-      .collection("requests")
-      .where("credt", "<", baseDate)
-      .limit(100);
-    const snapshot = await query.get();
-
-    if (snapshot.empty) return;
-
-    console.log("delete requests num: ", snapshot.size);
-
-    const batch = firestore.batch();
-    snapshot.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-    batch.commit();
   }
 );
 
@@ -737,14 +473,14 @@ async function messaging(uid, tgts, type) {
         },
         android: {
           notification: {
-            // notification_count: ntfCounts[token], // 後でコメント外す
+            notification_count: ntfCounts[token],
             sound: "default",
           },
         },
         apns: {
           payload: {
             aps: {
-              // badge: ntfCounts[token], // 後でコメント外す
+              badge: ntfCounts[token],
               sound: "default",
             },
           },
