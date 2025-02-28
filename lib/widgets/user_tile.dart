@@ -9,7 +9,6 @@ import '../models/request.dart';
 import '../models/user_data.dart';
 import '../providers/friend_states.dart';
 import '../providers/layout_providers.dart';
-import '../providers/requests_proivider.dart';
 import 'icon_widget.dart';
 import 'loading_dialog.dart';
 
@@ -61,39 +60,17 @@ class UserTile extends ConsumerWidget {
   }
 
   Widget _userButton(
-    Map<String, String> friendStates,
-    List<Request> requests,
+    List<FriendState> friendStates,
     Layout layout,
     BuildContext context,
   ) {
-    final List<Request> tgt =
-        requests.where((Request r) => r.tgt == user.uid).toList();
-    if (tgt.isNotEmpty) {
-      return OutlinedButton(
-        onPressed: null,
-        style: OutlinedButton.styleFrom(
-          visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          foregroundColor: layout.subText,
-          side: BorderSide(color: layout.subText),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        child: SizedBox(
-          width: 15,
-          height: 15,
-          child: CircularProgressIndicator(
-            strokeWidth: 1,
-            color: layout.subText,
-            strokeCap: StrokeCap.round,
-          ),
-        ),
-      );
-    } else if (friendStates.containsKey(user.uid)) {
-      if (friendStates[user.uid] == FriendState.friend) {
+    final Request request = Request(uid: myData.uid, tgt: user.uid);
+    if (friendStates.any((friendState) => friendState.uid == user.uid)) {
+      final FriendState friendState =
+          friendStates.firstWhere((friendState) => friendState.uid == user.uid);
+      if (friendState.isFriend) {
         return OutlinedButton(
-          onPressed: () => LoadingDialog(_block()).show(context),
+          onPressed: () => LoadingDialog(request.block()).show(context),
           style: OutlinedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -105,9 +82,9 @@ class UserTile extends ConsumerWidget {
           ),
           child: const Text('ブロック'),
         );
-      } else if (friendStates[user.uid] == FriendState.requesting) {
+      } else if (friendState.isRequesting) {
         return OutlinedButton(
-          onPressed: () => LoadingDialog(_unfriend()).show(context),
+          onPressed: () => LoadingDialog(request.unrequest()).show(context),
           style: OutlinedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -119,9 +96,9 @@ class UserTile extends ConsumerWidget {
           ),
           child: const Text('リクエスト済み'),
         );
-      } else if (friendStates[user.uid] == FriendState.requested) {
+      } else if (friendState.isRequested) {
         return ElevatedButton(
-          onPressed: () => LoadingDialog(_friend()).show(context),
+          onPressed: () => LoadingDialog(request.request()).show(context),
           style: ElevatedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -134,9 +111,9 @@ class UserTile extends ConsumerWidget {
           ),
           child: const Text('確認'),
         );
-      } else if (friendStates[user.uid] == FriendState.blocking) {
+      } else if (friendState.isBlocking) {
         return OutlinedButton(
-          onPressed: () => LoadingDialog(_unblock()).show(context),
+          onPressed: () => LoadingDialog(request.unblock()).show(context),
           style: OutlinedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -148,9 +125,9 @@ class UserTile extends ConsumerWidget {
           ),
           child: const Text('ブロック中'),
         );
-      } else if (friendStates[user.uid] == FriendState.blocked) {
+      } else if (friendState.isBlocked) {
         return OutlinedButton(
-          onPressed: () => LoadingDialog(_block()).show(context),
+          onPressed: () => LoadingDialog(request.block()).show(context),
           style: OutlinedButton.styleFrom(
             visualDensity: VisualDensity.compact,
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -165,7 +142,7 @@ class UserTile extends ConsumerWidget {
       }
     }
     return ElevatedButton(
-      onPressed: () => LoadingDialog(_friend()).show(context),
+      onPressed: () => LoadingDialog(request.request()).show(context),
       style: ElevatedButton.styleFrom(
         visualDensity: VisualDensity.compact,
         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -180,27 +157,10 @@ class UserTile extends ConsumerWidget {
     );
   }
 
-  Future<void> _friend() async {
-    await Request.friendRequest(myData.uid, user.uid).toFirestore();
-  }
-
-  Future<void> _unfriend() async {
-    await Request.unfriendRequest(myData.uid, user.uid).toFirestore();
-  }
-
-  Future<void> _block() async {
-    await Request.blockRequest(myData.uid, user.uid).toFirestore();
-  }
-
-  Future<void> _unblock() async {
-    await Request.unblockRequest(myData.uid, user.uid).toFirestore();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
-    final List<Request> requests = ref.watch(requestsProvider);
+    final List<FriendState> friendStates = ref.watch(friendStatesProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       width: double.infinity,
@@ -230,7 +190,7 @@ class UserTile extends ConsumerWidget {
             const SizedBox(width: 15),
             SizedBox(
               width: 130,
-              child: _userButton(friendStates, requests, layout, context),
+              child: _userButton(friendStates, layout, context),
             ),
           ],
         ),

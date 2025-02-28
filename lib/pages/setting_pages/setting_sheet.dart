@@ -7,10 +7,12 @@ import 'package:share_plus/share_plus.dart';
 import '../../models/data_state.dart';
 import '../../models/friend_state.dart';
 import '../../models/layout.dart';
+import '../../models/message.dart';
 import '../../models/user_data.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/friend_states.dart';
 import '../../providers/layout_providers.dart';
+import '../../providers/messages_provider.dart';
 import '../../providers/my_data_privder.dart';
 import '../../widgets/icon_widget.dart';
 import '../../widgets/setting_item.dart';
@@ -38,21 +40,21 @@ class SettingSheet extends ConsumerStatefulWidget {
 
 class SettingSheetState extends SettingState<SettingSheet> {
   Future<int> _countingUsers(
-    Map<String, String> friendStates,
+    List<FriendState> friendStates,
     String tgtState,
   ) async {
     final List<String> tgtIds = [];
     if (tgtState == FriendState.friend) {
-      friendStates.forEach((String key, String value) {
-        if (value == FriendState.friend) tgtIds.add(key);
-      });
-      friendStates.forEach((String key, String value) {
-        if (value == FriendState.blocked) tgtIds.add(key);
-      });
+      for (FriendState friendState in friendStates) {
+        if (friendState.isFriend) tgtIds.add(friendState.uid);
+      }
+      for (FriendState friendState in friendStates) {
+        if (friendState.isBlocked) tgtIds.add(friendState.uid);
+      }
     } else {
-      friendStates.forEach((String key, String value) {
-        if (value == tgtState) tgtIds.add(key);
-      });
+      for (FriendState friendState in friendStates) {
+        if (friendState.state == tgtState) tgtIds.add(friendState.uid);
+      }
     }
     if (tgtIds.isEmpty) return 0;
 
@@ -69,7 +71,8 @@ class SettingSheetState extends SettingState<SettingSheet> {
     required Layout layout,
     required UserData? myData,
     required User? user,
-    required Map<String, String> friendStates,
+    required List<FriendState> friendStates,
+    required List<Message> messages,
     required DataState dataState,
   }) {
     final Map<String, List<Widget>> settingMenus = {};
@@ -80,10 +83,10 @@ class SettingSheetState extends SettingState<SettingSheet> {
           width: double.infinity,
           alignment: const Alignment(0, -0.6),
           child: SizedBox(
-            height: 25,
-            width: 25,
+            height: 18,
+            width: 18,
             child: CircularProgressIndicator(
-              strokeWidth: 1,
+              strokeWidth: 1.5,
               color: layout.subText,
               strokeCap: StrokeCap.round,
             ),
@@ -126,7 +129,15 @@ class SettingSheetState extends SettingState<SettingSheet> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'フレンドキー： ${myData.uid}',
+              'フレンドキー： ',
+              style: TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 13,
+                color: layout.mainText,
+              ),
+            ),
+            SelectableText(
+              myData.uid,
               style: TextStyle(
                 fontWeight: FontWeight.w300,
                 fontSize: 13,
@@ -168,8 +179,12 @@ class SettingSheetState extends SettingState<SettingSheet> {
         ),
         SettingItem(
           menu: 'フレンド一覧',
-          onTap: () => SettingState.push(context, FriendsPage(myData)),
+          onTap: () {
+            ref.read(messagesProvider.notifier).readMessages(Message.friend);
+            SettingState.push(context, FriendsPage(myData));
+          },
           counting: _countingUsers(friendStates, FriendState.friend),
+          putBadge: messages.any((Message message) => message.isFriend),
         ),
         SettingItem(
           menu: '送信リクエスト',
@@ -178,8 +193,12 @@ class SettingSheetState extends SettingState<SettingSheet> {
         ),
         SettingItem(
           menu: '受信リクエスト',
-          onTap: () => SettingState.push(context, RequestedPage(myData)),
+          onTap: () {
+            ref.read(messagesProvider.notifier).readMessages(Message.request);
+            SettingState.push(context, RequestedPage(myData));
+          },
           counting: _countingUsers(friendStates, FriendState.requested),
+          putBadge: messages.any((Message message) => message.isRequest),
         ),
         SettingItem(
           menu: 'ブロックリスト',
@@ -221,7 +240,8 @@ class SettingSheetState extends SettingState<SettingSheet> {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
     final User? user = ref.watch(authProvider);
     final UserData? myData = ref.watch(myDataProvider);
-    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
+    final List<FriendState> friendStates = ref.watch(friendStatesProvider);
+    final List<Message> messages = ref.watch(messagesProvider);
     final List<Widget> children = [];
     late final Map<String, List<Widget>> settingMenus;
 
@@ -232,6 +252,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         myData: null,
         user: null,
         friendStates: friendStates,
+        messages: messages,
         dataState: DataState.normal(),
       );
     } else if (myData == null) {
@@ -241,6 +262,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         myData: null,
         user: user,
         friendStates: friendStates,
+        messages: messages,
         dataState: DataState.loading(),
       );
     } else {
@@ -250,6 +272,7 @@ class SettingSheetState extends SettingState<SettingSheet> {
         myData: myData,
         user: user,
         friendStates: friendStates,
+        messages: messages,
         dataState: DataState.normal(),
       );
     }

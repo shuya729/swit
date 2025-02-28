@@ -1,55 +1,106 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'friend_state.dart';
+
 class Request {
   final String uid;
   final String tgt;
-  final String request;
-
-  const Request({
+  Request({
     required this.uid,
     required this.tgt,
-    required this.request,
   });
 
-  static final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<void> toFirestore() async {
-    final CollectionReference collection = firestore.collection('requests');
-    await collection.add({
-      'uid': uid,
-      'tgt': tgt,
-      'request': request,
-      'credt': FieldValue.serverTimestamp(),
+  Map<String, dynamic> _data({
+    required String uid,
+    required String tgt,
+    required String state,
+    bool create = false,
+  }) {
+    if (create) {
+      return {
+        'uid': uid,
+        'tgt': tgt,
+        'state': state,
+        'upddt': FieldValue.serverTimestamp(),
+        'credt': FieldValue.serverTimestamp(),
+      };
+    } else {
+      return {
+        'uid': uid,
+        'tgt': tgt,
+        'state': state,
+        'upddt': FieldValue.serverTimestamp(),
+      };
+    }
+  }
+
+  Future<void> request() async {
+    final DocumentReference udoc =
+        firestore.collection('users').doc(uid).collection('friends').doc(tgt);
+    final DocumentReference tdoc =
+        firestore.collection('users').doc(tgt).collection('friends').doc(uid);
+    await firestore.runTransaction((t) async {
+      final DocumentSnapshot tSnap = await t.get(tdoc);
+      if (tSnap.exists && FriendState.fromFirestore(tSnap).isRequesting) {
+        t.update(udoc, _data(uid: uid, tgt: tgt, state: FriendState.friend));
+        t.update(tdoc, _data(uid: tgt, tgt: uid, state: FriendState.friend));
+      } else {
+        t.set(
+          udoc,
+          _data(
+              uid: uid, tgt: tgt, state: FriendState.requesting, create: true),
+        );
+        t.set(
+          tdoc,
+          _data(uid: tgt, tgt: uid, state: FriendState.requested, create: true),
+        );
+      }
     });
   }
 
-  factory Request.fromFirestore(DocumentSnapshot doc) {
-    final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Request(
-      uid: data['uid'],
-      tgt: data['tgt'],
-      request: data['request'],
-    );
+  Future<void> unrequest() async {
+    final DocumentReference udoc =
+        firestore.collection('users').doc(uid).collection('friends').doc(tgt);
+    final DocumentReference tdoc =
+        firestore.collection('users').doc(tgt).collection('friends').doc(uid);
+    await firestore.runTransaction((t) async {
+      final DocumentSnapshot tSnap = await t.get(tdoc);
+      t.delete(udoc);
+      if (tSnap.exists) t.delete(tdoc);
+    });
   }
 
-  static String get friend => 'friend';
-  static String get unfriend => 'unfriend';
-  static String get block => 'block';
-  static String get unblock => 'unblock';
-
-  factory Request.friendRequest(String uid, String tgt) {
-    return Request(uid: uid, tgt: tgt, request: friend);
+  Future<void> block() async {
+    final DocumentReference udoc =
+        firestore.collection('users').doc(uid).collection('friends').doc(tgt);
+    final DocumentReference tdoc =
+        firestore.collection('users').doc(tgt).collection('friends').doc(uid);
+    await firestore.runTransaction((t) async {
+      final DocumentSnapshot tSnap = await t.get(tdoc);
+      if (tSnap.exists && FriendState.fromFirestore(tSnap).isBlocking) {
+        t.update(udoc, _data(uid: uid, tgt: tgt, state: FriendState.blocking));
+      } else {
+        t.update(udoc, _data(uid: uid, tgt: tgt, state: FriendState.blocking));
+        t.update(tdoc, _data(uid: tgt, tgt: uid, state: FriendState.blocked));
+      }
+    });
   }
 
-  factory Request.unfriendRequest(String uid, String tgt) {
-    return Request(uid: uid, tgt: tgt, request: unfriend);
-  }
-
-  factory Request.blockRequest(String uid, String tgt) {
-    return Request(uid: uid, tgt: tgt, request: block);
-  }
-
-  factory Request.unblockRequest(String uid, String tgt) {
-    return Request(uid: uid, tgt: tgt, request: unblock);
+  Future<void> unblock() async {
+    final DocumentReference udoc =
+        firestore.collection('users').doc(uid).collection('friends').doc(tgt);
+    final DocumentReference tdoc =
+        firestore.collection('users').doc(tgt).collection('friends').doc(uid);
+    await firestore.runTransaction((t) async {
+      final DocumentSnapshot tSnap = await t.get(tdoc);
+      if (tSnap.exists && FriendState.fromFirestore(tSnap).isBlocking) {
+        t.update(udoc, _data(uid: uid, tgt: tgt, state: FriendState.blocked));
+      } else {
+        t.update(udoc, _data(uid: uid, tgt: tgt, state: FriendState.friend));
+        t.update(tdoc, _data(uid: tgt, tgt: uid, state: FriendState.friend));
+      }
+    });
   }
 }

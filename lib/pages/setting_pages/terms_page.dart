@@ -96,10 +96,10 @@ class TermsPage extends ConsumerWidget {
           } else {
             return Center(
               child: SizedBox(
-                width: 30,
-                height: 30,
+                width: 22,
+                height: 22,
                 child: CircularProgressIndicator(
-                  strokeWidth: 1,
+                  strokeWidth: 1.5,
                   color: layout.subText,
                   strokeCap: StrokeCap.round,
                 ),

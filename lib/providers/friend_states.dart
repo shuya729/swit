@@ -2,16 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/friend_state.dart';
 import 'auth_provider.dart';
 
 final friendStatesProvider =
-    StateNotifierProvider<_FriendStatesNotifier, Map<String, String>>((ref) {
+    StateNotifierProvider<_FriendStatesNotifier, List<FriendState>>((ref) {
   final User? auth = ref.watch(authProvider);
   return _FriendStatesNotifier(auth);
 });
 
-class _FriendStatesNotifier extends StateNotifier<Map<String, String>> {
-  _FriendStatesNotifier(this._user) : super({}) {
+class _FriendStatesNotifier extends StateNotifier<List<FriendState>> {
+  _FriendStatesNotifier(this._user) : super([]) {
     _init();
   }
   final User? _user;
@@ -20,19 +21,23 @@ class _FriendStatesNotifier extends StateNotifier<Map<String, String>> {
   Future<void> _init() async {
     try {
       if (_user == null) return;
-      final Stream<DocumentSnapshot> stream =
-          _firestore.collection('friends').doc(_user.uid).snapshots();
-      await for (DocumentSnapshot doc in stream) {
-        if (doc.exists) {
-          if (mounted) {
-            state = (doc.data() as Map<String, dynamic>).cast<String, String>();
+      final Stream<QuerySnapshot> stream = _firestore
+          .collection('users')
+          .doc(_user.uid)
+          .collection('friends')
+          .snapshots();
+      await for (QuerySnapshot snapshot in stream) {
+        final List<FriendState> states = [];
+        for (DocumentSnapshot doc in snapshot.docs) {
+          final FriendState friendState = FriendState.fromFirestore(doc);
+          if (friendState.isFriendState) {
+            states.add(FriendState.fromFirestore(doc));
           }
-        } else {
-          if (mounted) state = {};
         }
+        if (mounted) state = states;
       }
     } catch (e) {
-      if (mounted) state = {};
+      if (mounted) state = [];
     }
   }
 }

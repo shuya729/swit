@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.5.6+1.5.6
+version: 1.6.6+1.6.6
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -59,6 +59,8 @@ dependencies:
   firebase_crashlytics:
   firebase_app_check:
   firebase_messaging:
+  flutter_app_badge_control:
+  synchronized:
 
 dev_dependencies:
   flutter_test:
@@ -83,7 +85,19 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/person.png
+    - assets/settings/person.png
+
+    # 以下ラベル画像
+    - assets/labels/LB0101_cat/LB0101_cat.png
+    - assets/labels/LB0101_cat/LB0101_cat.gif
+    - assets/labels/LB0102_bird/LB0102_bird.png
+    - assets/labels/LB0102_bird/LB0102_bird.gif
+    - assets/labels/LB0103_dolphin/LB0103_dolphin.png
+    - assets/labels/LB0103_dolphin/LB0103_dolphin.gif
+    - assets/labels/LB0104_penguin/LB0104_penguin.png
+    - assets/labels/LB0104_penguin/LB0104_penguin.gif
+    - assets/labels/LB0105_rabbit/LB0105_rabbit.png
+    - assets/labels/LB0105_rabbit/LB0105_rabbit.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -112,22 +126,22 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
 flutter_native_splash:
-  image: "images/swit_splash_768.png"
+  image: "assets/settings/swit_splash_768.png"
   color: "#66c0b7"
-  image_dark: "images/swit_splash_768.png"
+  image_dark: "assets/settings/swit_splash_768.png"
   color_dark: "#66c0b7"
   fullscreen: true
 
   android_12:
-    image: "images/swit_splash_1152.png"
+    image: "assets/settings/swit_splash_1152.png"
     icon_background_color: "#66c0b7"
-    image_dark: "images/swit_splash_1152.png"
+    image_dark: "assets/settings/swit_splash_1152.png"
     icon_background_color_dark: "#66c0b7"
 
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path_ios: "images/swit_icon_1024.png"
-  image_path_android: "images/swit_icon_1024.png"
+  image_path_ios: "assets/settings/swit_icon_1024.png"
+  image_path_android: "assets/settings/swit_icon_1024.png"
   adaptive_icon_background: "#66c0b7"
-  adaptive_icon_foreground: "images/swit_icon_512.png"
+  adaptive_icon_foreground: "assets/settings/swit_icon_512.png"

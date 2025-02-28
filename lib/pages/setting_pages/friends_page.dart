@@ -16,18 +16,18 @@ class FriendsPage extends SettingWidget {
 
   @override
   Future<List<UserData>> getTgtUsers(
-    Map<String, String> userStates,
+    List<FriendState> userStates,
   ) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final List<UserData> friends = [];
     final List<String> friendIds = [];
 
-    userStates.forEach((String key, String value) {
-      if (value == FriendState.friend) friendIds.add(key);
-    });
-    userStates.forEach((String key, String value) {
-      if (value == FriendState.blocked) friendIds.add(key);
-    });
+    for (FriendState userState in userStates) {
+      if (userState.isFriend) friendIds.add(userState.uid);
+    }
+    for (FriendState userState in userStates) {
+      if (userState.isBlocked) friendIds.add(userState.uid);
+    }
     if (friendIds.isEmpty) {
       return friends;
     }
@@ -47,8 +47,12 @@ class FriendsPage extends SettingWidget {
     );
 
     friends.sort((UserData a, UserData b) {
-      final String astate = userStates[a.uid] ?? FriendState.friend;
-      final String bstate = userStates[b.uid] ?? FriendState.friend;
+      final String astate = userStates
+          .firstWhere((FriendState userState) => userState.uid == a.uid)
+          .state;
+      final String bstate = userStates
+          .firstWhere((FriendState userState) => userState.uid == b.uid)
+          .state;
       if (astate == bstate) {
         return 0;
       } else if (astate == FriendState.friend) {

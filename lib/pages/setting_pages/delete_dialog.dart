@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../models/layout.dart';
 import '../../models/messaging.dart';
+import '../../models/presence.dart';
 import '../../widgets/loading_dialog.dart';
 import '../../widgets/setting_dialog.dart';
 
@@ -36,7 +36,7 @@ class DeleteDialog extends SettingDialog {
   }
 
   Future<void> _delete() async {
-    final FirebaseDatabase database = FirebaseDatabase.instance;
+    final Presence presence = Presence.instance;
     User? reauthUser;
     try {
       if (user.providerData[0].providerId == 'google.com') {
@@ -45,8 +45,8 @@ class DeleteDialog extends SettingDialog {
         reauthUser = await _reauthWithApple();
       } else {}
       if (reauthUser == null) return;
-      await database.goOffline();
       await Messaging().deleteToken();
+      await presence.goOffline();
       await user.delete();
     } catch (e) {
       showMsgbar('アカウントの削除に失敗しました。');

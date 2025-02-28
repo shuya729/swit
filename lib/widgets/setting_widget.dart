@@ -7,6 +7,7 @@ import '../../models/user_data.dart';
 import '../../providers/friend_states.dart';
 import '../../providers/layout_providers.dart';
 import '../../widgets/user_tile.dart';
+import '../models/friend_state.dart';
 
 abstract class SettingWidget extends ConsumerWidget {
   const SettingWidget(this.myData, {super.key});
@@ -98,14 +99,14 @@ abstract class SettingWidget extends ConsumerWidget {
   @protected
   String get tgtFriendState;
 
-  Future<List<UserData>> getTgtUsers(Map<String, String> userStates) async {
+  Future<List<UserData>> getTgtUsers(List<FriendState> userStates) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final List<UserData> tgtUsers = [];
     final List<String> tgtIds = [];
 
-    userStates.forEach((String key, String value) {
-      if (value == tgtFriendState) tgtIds.add(key);
-    });
+    for (FriendState userState in userStates) {
+      if (userState.state == tgtFriendState) tgtIds.add(userState.uid);
+    }
     if (tgtIds.isEmpty) {
       return tgtUsers;
     }
@@ -130,7 +131,7 @@ abstract class SettingWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Layout layout = ref.watch(layoutProvider) ?? Layout.def;
-    final Map<String, String> friendStates = ref.watch(friendStatesProvider);
+    final List<FriendState> friendStates = ref.watch(friendStatesProvider);
 
     return pageTemp(
       context: context,

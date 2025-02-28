@@ -20,12 +20,12 @@ class _FriendsNotifier extends StateNotifier<List<UserData>> {
 
   Future<void> _init() async {
     try {
-      final Map<String, String> friendStates = _ref.watch(friendStatesProvider);
+      final List<FriendState> friendStates = _ref.watch(friendStatesProvider);
       final List<String> friendIds = [];
 
-      friendStates.forEach((String key, String value) {
-        if (FriendState.isFriend(value)) friendIds.add(key);
-      });
+      for (FriendState friendState in friendStates) {
+        if (friendState.isFriend) friendIds.add(friendState.uid);
+      }
 
       if (friendIds.isEmpty) {
         if (mounted) state = [];

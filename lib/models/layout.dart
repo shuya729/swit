@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'label.dart';
+
 class Layout {
   const Layout({
     required this.theme,
@@ -12,6 +14,7 @@ class Layout {
     required this.subText,
     required this.image,
     this.error = const Color(0xFFD32F2F),
+    required this.label,
   });
 
   final Color theme;
@@ -21,6 +24,7 @@ class Layout {
   final Color subText;
   final File? image;
   final Color error;
+  final Label label;
 
   static const double _mainBackRate = 0.6;
   static const double _subTextRate = 0.3;
@@ -35,6 +39,7 @@ class Layout {
       subBack: defTheme,
       subText: Color.lerp(Colors.white, defTheme, _subTextRate)!,
       image: null,
+      label: Label.def,
     );
   }
 
@@ -46,6 +51,7 @@ class Layout {
       subBack: theme,
       subText: Color.lerp(Colors.white, theme, _subTextRate)!,
       image: image,
+      label: label,
     );
   }
 
@@ -57,6 +63,19 @@ class Layout {
       subBack: subBack,
       subText: subText,
       image: image,
+      label: label,
+    );
+  }
+
+  Layout _copyWithLabel(Label label) {
+    return Layout(
+      theme: theme,
+      mainBack: mainBack,
+      mainText: mainText,
+      subBack: subBack,
+      subText: subText,
+      image: image,
+      label: label,
     );
   }
 
@@ -68,18 +87,21 @@ class Layout {
     final int? theme = prefs.getInt('theme');
     final String imageFile = prefs.getString('imageFile') ?? '';
     final String imagePath = '$localPath/$imageFile';
+    final String labelId = prefs.getString('labelId') ?? Label.def.id;
     if (theme != null) {
       layout = layout._copyWithColor(Color(theme));
     }
     if (imageFile.isNotEmpty && File(imagePath).existsSync()) {
       layout = layout._copyWithImage(File(imagePath));
     }
+    layout = layout._copyWithLabel(Label.fromId(labelId));
     return layout;
   }
 
   Future<Layout> update({
     required Color theme,
     required File? image,
+    required Label label,
     required SharedPreferences prefs,
     required String localPath,
   }) async {
@@ -96,6 +118,9 @@ class Layout {
         await File(this.image!.path).delete();
       }
     }
+    if (label.id != this.label.id) {
+      await prefs.setString('labelId', label.id);
+    }
     return Layout(
       theme: theme,
       mainBack: Color.lerp(Colors.white, theme, _mainBackRate)!,
@@ -103,6 +128,7 @@ class Layout {
       subBack: theme,
       subText: Color.lerp(Colors.white, theme, _subTextRate)!,
       image: image,
+      label: label,
     );
   }
 }
